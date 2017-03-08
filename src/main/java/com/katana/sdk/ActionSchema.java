@@ -294,18 +294,23 @@ public class ActionSchema {
      * @return
      */
     public Object resolveEntity(Map<String, Object> data) {
-
         if (this.entityPath == null || this.entityPath.isEmpty()) {
             return data;
         }
         String[] keys = this.entityPath.split(this.pathDelimiter);
-        for (String key : keys) {
-            if (!data.containsKey(key) && data.get(key) instanceof Map) {
-                throw new IllegalArgumentException(String.format(ExceptionMessage.CANNOT_RESOLVE_ENTITY, this.name));
-            }
-            data = (Map) data.get(key);
+        return getEntityObject(data, keys, 0);
+    }
+
+    private Object getEntityObject(Map<String, Object> data, String[] keys, int keyIndex) {
+        if (!data.containsKey(keys[keyIndex])) {
+            throw new IllegalArgumentException(String.format(ExceptionMessage.CANNOT_RESOLVE_ENTITY, this.name));
         }
-        return data;
+
+        if (keyIndex < keys.length - 1) {
+            return getEntityObject((Map)data.get(keys[keyIndex]), keys, keyIndex + 1);
+        } else {
+            return data.get(keys[keyIndex]);
+        }
     }
 
     /**

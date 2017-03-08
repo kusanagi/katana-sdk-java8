@@ -153,12 +153,7 @@ public class ComponentTest {
     @Test
     public void hasResource_existingResource_returnTrue() {
         String resource = "resource";
-        Callable<Action> callable = new Callable<Action>() {
-            @Override
-            public Action run(Action object) {
-                return null;
-            }
-        };
+        Callable<Action> callable = object -> null;
 
         component.setResource(resource, callable);
 
@@ -208,30 +203,24 @@ public class ComponentTest {
         final Mapping mapping = mockFactory.getMapping("users", "0.2.0");
 
         TestMiddleware testMiddleware = new TestMiddleware("-c middleware -n users -v 0.2.0 -f 0.1.0 -t " + PORT + " -D -V workers=1");
-        testMiddleware.getMiddleware().request(new Callable<Request>() {
-            @Override
-            public Request run(Request request) {
-                requestCommandPayloads[0] = requestCommandPayload;
-                requestCommandPayloads[0].getCommand().setArgument(request);
-                mappings[0] = request.getMapping();
-                request.setServiceName("users");
-                request.setServiceVersion("0.2.0");
-                request.setActionName("example");
-                Param param = request.newParam("tlf", "555555", "string");
-                request.setParam(param);
-                countDownLatch.countDown();
-                return request;
-            }
+        testMiddleware.getMiddleware().request(request -> {
+            requestCommandPayloads[0] = requestCommandPayload;
+            requestCommandPayloads[0].getCommand().setArgument(request);
+            mappings[0] = request.getMapping();
+            request.setServiceName("users");
+            request.setServiceVersion("0.2.0");
+            request.setActionName("example");
+            Param param = request.newParam("tlf", "555555", "string");
+            request.setParam(param);
+            countDownLatch.countDown();
+            return request;
         });
         testMiddleware.start();
 
         TestClient testClient = new TestClient(addr,
-                new TestClient.Listener() {
-                    @Override
-                    public void onReply(byte[] part1, byte[] reply) throws IOException {
-                        callReplyPayloads[0] = serializer.deserialize(reply, CallReplyPayload.class);
-                        countDownLatch.countDown();
-                    }
+                (part1, reply) -> {
+                    callReplyPayloads[0] = serializer.deserialize(reply, CallReplyPayload.class);
+                    countDownLatch.countDown();
                 },
                 "request".getBytes(),
                 serializer.serializeInBytes(mapping.getServiceSchema()),
@@ -291,13 +280,13 @@ public class ComponentTest {
         assertEquals(true, httpRequest.hasQueryParam("name"));
         assertEquals("James", httpRequest.getQueryParam("name", ""));
         assertEquals("Unknown", httpRequest.getQueryParam("addr", "Unknown"));
-        assertEquals(1, httpRequest.getQueryParamArray("name", new ArrayList<String>()).size());
+        assertEquals(1, httpRequest.getQueryParamArray("name", new ArrayList<>()).size());
         assertEquals(2, httpRequest.getQueryParamArray("addr", Arrays.asList("Unknown", "Unknown")).size());
         assertEquals("32", httpRequest.getQueryParams().get("age"));
         assertEquals(true, httpRequest.hasPostParam("name"));
         assertEquals("Juan", httpRequest.getPostParam("name", ""));
         assertEquals("Unknown", httpRequest.getPostParam("addr", "Unknown"));
-        assertEquals(1, httpRequest.getPostParamArray("name", new ArrayList<String>()).size());
+        assertEquals(1, httpRequest.getPostParamArray("name", new ArrayList<>()).size());
         assertEquals(2, httpRequest.getPostParamArray("addr", Arrays.asList("Unknown", "Unknown")).size());
         assertEquals("27", httpRequest.getPostParams().get("age"));
     }
@@ -315,28 +304,22 @@ public class ComponentTest {
         final Mapping mapping = mockFactory.getMapping("users", "0.2.0");
 
         TestMiddleware testMiddleware = new TestMiddleware("-c middleware -n users -v 0.2.0 -f 0.1.0 -t " + PORT + " -D -V workers=1");
-        testMiddleware.getMiddleware().response(new Callable<Response>() {
-            @Override
-            public Response run(Response object) {
-                responseCommandPayloads[0] = responseCommandPayload;
-                responseCommandPayloads[0].getCommand().setArgument(object);
-                mappings[0] = object.getMapping();
-                object.getHttpResponse().setProtocolVersion("1.0");
-                object.getHttpResponse().setStatus(201, "Created");
-                object.getHttpResponse().setHeader("Authorization", "Token");
-                countDownLatch.countDown();
-                return object;
-            }
+        testMiddleware.getMiddleware().response(object -> {
+            responseCommandPayloads[0] = responseCommandPayload;
+            responseCommandPayloads[0].getCommand().setArgument(object);
+            mappings[0] = object.getMapping();
+            object.getHttpResponse().setProtocolVersion("1.0");
+            object.getHttpResponse().setStatus(201, "Created");
+            object.getHttpResponse().setHeader("Authorization", "Token");
+            countDownLatch.countDown();
+            return object;
         });
         testMiddleware.start();
 
         TestClient testClient = new TestClient(addr,
-                new TestClient.Listener() {
-                    @Override
-                    public void onReply(byte[] part1, byte[] reply) throws IOException {
-                        responseReplyPayloads[0] = serializer.deserialize(reply, ResponseReplyPayload.class);
-                        countDownLatch.countDown();
-                    }
+                (part1, reply) -> {
+                    responseReplyPayloads[0] = serializer.deserialize(reply, ResponseReplyPayload.class);
+                    countDownLatch.countDown();
                 },
                 "response".getBytes(),
                 serializer.serializeInBytes(mapping.getServiceSchema()),
@@ -403,49 +386,43 @@ public class ComponentTest {
         final Mapping mapping = mockFactory.getMapping("users", "0.2.0");
 
         TestService testService = new TestService("-c service -n users -v 0.2.0 -f 0.1.0 -t " + PORT + " -D -V workers=1");
-        testService.getService().action("read", new Callable<Action>() {
-            @Override
-            public Action run(Action object) {
-                actionCommandPayloads[0] = actionCommandPayload;
-                actionCommandPayloads[0].getCommand().setArgument(object);
-                mappings[0] = object.getMapping();
+        testService.getService().action("read", object -> {
+            actionCommandPayloads[0] = actionCommandPayload;
+            actionCommandPayloads[0].getCommand().setArgument(object);
+            mappings[0] = object.getMapping();
 //                object.setProperty("property", "value");
-                File file = object.newFile("file", "path", "image/jpeg");
-                object.setDownload(file);
-                file.setName(null);
-                object.setEntity("entity");
-                List<String> collection = new ArrayList<>();
-                collection.add("entity1");
-                collection.add("entity2");
-                object.setCollection(collection);
-                object.relateOne("id", "post", "author");
-                object.relateMany("id", "post", Arrays.asList("collaborator", "writer"));
-                object.relateOneRemote("id", "http://192.168.55.10", "post", "author");
-                object.relateManyRemote("id", "http://192.168.55.10", "post", Arrays.asList("collaborator", "writer"));
-                object.setLink("self", "/0.1.0/users");
-                List<Param> params = new ArrayList<>();
-                object.newParam("param1", "value", "string");
-                object.newParam("param2", "value", "string");
-                object.commit("create", params);
-                object.rollback("create", params);
-                object.complete("create", params);
-                object.deferCall("posts", "0.1.0", "read", params, null);
-                object.callRemote("http://192.168.55.10", "posts", "0.1.0", "read", params, null, 1000);
-                object.error("Unauthorized", 401, "401 Unauthorized");
-                transports[0] = object.getTransport();
-                countDownLatch.countDown();
-                return object;
-            }
+            File file = object.newFile("file", "path", "image/jpeg");
+            object.setDownload(file);
+            file.setName(null);
+            object.setEntity("entity");
+            List<String> collection = new ArrayList<>();
+            collection.add("entity1");
+            collection.add("entity2");
+            object.setCollection(collection);
+            object.relateOne("id", "post", "author");
+            object.relateMany("id", "post", Arrays.asList("collaborator", "writer"));
+            object.relateOneRemote("id", "http://192.168.55.10", "post", "author");
+            object.relateManyRemote("id", "http://192.168.55.10", "post", Arrays.asList("collaborator", "writer"));
+            object.setLink("self", "/0.1.0/users");
+            List<Param> params = new ArrayList<>();
+            object.newParam("param1", "value", "string");
+            object.newParam("param2", "value", "string");
+            object.commit("create", params);
+            object.rollback("create", params);
+            object.complete("create", params);
+            object.deferCall("posts", "0.1.0", "read", params, null);
+            object.callRemote("http://192.168.55.10", "posts", "0.1.0", "read", params, null, 1000);
+            object.error("Unauthorized", 401, "401 Unauthorized");
+            transports[0] = object.getTransport();
+            countDownLatch.countDown();
+            return object;
         });
         testService.start();
 
         TestClient testClient = new TestClient(addr,
-                new TestClient.Listener() {
-                    @Override
-                    public void onReply(byte[] part1, byte[] reply) throws IOException {
-                        transportReplyPayloads[0] = serializer.deserialize(reply, TransportReplyPayload.class);
-                        countDownLatch.countDown();
-                    }
+                (part1, reply) -> {
+                    transportReplyPayloads[0] = serializer.deserialize(reply, TransportReplyPayload.class);
+                    countDownLatch.countDown();
                 },
                 "read".getBytes(),
                 serializer.serializeInBytes(mapping.getServiceSchema()),
@@ -676,25 +653,19 @@ public class ComponentTest {
         final Mapping mapping = mockFactory.getMapping("users", "0.2.0");
 
         TestService testService = new TestService("-c service -n users -v 0.2.0 -f 0.1.0 -t " + PORT + " -D -V workers=1");
-        testService.getService().startup(new EventCallable<Service>() {
-            @Override
-            public Service run(Service object) {
-                if (secuence[0] == 0) {
-                    secuence[0] = 1;
-                }
-                countDownLatch.countDown();
-                return object;
+        testService.getService().startup(object -> {
+            if (secuence[0] == 0) {
+                secuence[0] = 1;
             }
+            countDownLatch.countDown();
+            return object;
         });
-        testService.getService().action("users", new Callable<Action>() {
-            @Override
-            public Action run(Action object) {
-                if (secuence[0] == 1) {
-                    secuence[0] = 2;
-                }
-                countDownLatch.countDown();
-                return object;
+        testService.getService().action("users", object -> {
+            if (secuence[0] == 1) {
+                secuence[0] = 2;
             }
+            countDownLatch.countDown();
+            return object;
         });
 //        testService.getService().shutdown(new EventCallable<Service>() {
 //            @Override
@@ -709,10 +680,7 @@ public class ComponentTest {
         testService.start();
 
         TestClient testClient = new TestClient(addr,
-                new TestClient.Listener() {
-                    @Override
-                    public void onReply(byte[] part1, byte[] reply) {
-                    }
+                (part1, reply) -> {
                 },
                 "users".getBytes(),
                 serializer.serializeInBytes(mapping.getServiceSchema()),
@@ -738,13 +706,10 @@ public class ComponentTest {
 
         final ActionCommandPayload actionCommandPayload = mockFactory.getActionCommandPayload();
         final Mapping mapping = mockFactory.getMapping("users", "0.2.0");
-        Callable<Action> usersResource = new Callable<Action>() {
-            @Override
-            public Action run(Action object) {
-                apis[0] = object;
-                countDownLatch.countDown();
-                return object;
-            }
+        Callable<Action> usersResource = object -> {
+            apis[0] = object;
+            countDownLatch.countDown();
+            return object;
         };
 
         TestService testService = new TestService("-c service -n users -v 0.2.0 -f 0.1.0 -t " + PORT + " -D -V workers=1");
@@ -753,10 +718,7 @@ public class ComponentTest {
         testService.start();
 
         TestClient testClient = new TestClient(addr,
-                new TestClient.Listener() {
-                    @Override
-                    public void onReply(byte[] part1, byte[] reply) {
-                    }
+                (part1, reply) -> {
                 },
                 "read".getBytes(),
                 serializer.serializeInBytes(mapping.getServiceSchema()),

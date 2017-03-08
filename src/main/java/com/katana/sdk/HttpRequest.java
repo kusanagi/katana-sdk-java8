@@ -226,7 +226,7 @@ public class HttpRequest {
      */
     public List<String> getQueryParamArray(String name, List<String> defaultArray) {
         List<String> values = this.queryParamsArray.get(name);
-        return values != null && !values.isEmpty() ? values : defaultArray != null ? defaultArray : new ArrayList<String>();
+        return values != null && !values.isEmpty() ? values : defaultArray != null ? defaultArray : new ArrayList<>();
     }
 
     /**
@@ -238,7 +238,7 @@ public class HttpRequest {
         Map<String, String> queryParams = new HashMap<>();
 
         for (Map.Entry key : this.queryParamsArray.entrySet()) {
-            queryParams.put((String) key.getKey(), this.queryParamsArray.get((String) key.getKey()).get(0));
+            queryParams.put((String) key.getKey(), this.queryParamsArray.get(key.getKey()).get(0));
         }
 
         return queryParams;
@@ -295,7 +295,7 @@ public class HttpRequest {
     @JsonIgnore
     public List<String> getPostParamArray(String name, List<String> defaultArray) {
         List<String> values = this.postParamsArray.get(name);
-        return values != null && !values.isEmpty() ? values : defaultArray != null ? defaultArray : new ArrayList<String>();
+        return values != null && !values.isEmpty() ? values : defaultArray != null ? defaultArray : new ArrayList<>();
     }
 
     /**
@@ -307,7 +307,7 @@ public class HttpRequest {
         Map<String, String> postParams = new HashMap<>();
 
         for (Map.Entry key : this.postParamsArray.entrySet()) {
-            postParams.put((String) key.getKey(), this.postParamsArray.get((String) key.getKey()).get(0));
+            postParams.put((String) key.getKey(), this.postParamsArray.get(key.getKey()).get(0));
         }
 
         return postParams;

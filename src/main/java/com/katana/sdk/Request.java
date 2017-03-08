@@ -195,7 +195,7 @@ public class Request extends Api {
     @JsonIgnore
     public Param getParam(String name) {
         if (this.requestCall.getParams() == null) {
-            this.requestCall.setParams(new ArrayList<Param>());
+            this.requestCall.setParams(new ArrayList<>());
         }
         for (Param param : this.requestCall.getParams()) {
             if (param.getName().equals(name)) {
@@ -229,7 +229,7 @@ public class Request extends Api {
      */
     public Request setParam(Param param) {
         if (this.requestCall == null) {
-            this.requestCall.setParams(new ArrayList<Param>());
+            this.requestCall.setParams(new ArrayList<>());
         }
         this.requestCall.getParams().add(param);
         return this;

@@ -310,18 +310,15 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
 
         setWorkers();
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                if (shutdownCallable != null) {
-                    runShutdown();
-                }
-
-                if (!stopped) {
-                    stopSocket();
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (shutdownCallable != null) {
+                runShutdown();
             }
-        });
+
+            if (!stopped) {
+                stopSocket();
+            }
+        }));
 
         ZMQ.proxy(router, dealer, null);
     }

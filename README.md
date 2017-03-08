@@ -32,7 +32,7 @@ Add the following in `pom.xml`:
 ```xml
 <dependency>
     <groupId>com.kusanagi</groupId>
-    <artifactId>katana-sdk-java7</artifactId>
+    <artifactId>katana-sdk-java8</artifactId>
     <version>1.0.0</version>
 </dependency>
 ```
@@ -42,7 +42,7 @@ Add the following in `pom.xml`:
 Add the following in `build.gradle`:
 ```gradle
 dependencies {
-    compile group: 'com.kusanagi', name: 'katana-sdk-java7', version: '1.0.0'
+    compile group: 'com.kusanagi', name: 'katana-sdk-java8', version: '1.0.0'
 }
 ```
 
