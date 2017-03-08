@@ -16,7 +16,7 @@ Installation
 
 In order to install the SDK you need to install the JDK 1.8:
 
-#### JDK 1.7:
+#### JDK 1.8:
 
 1. ```sudo apt-add-repository ppa:webupd8team/java```
 2. ```sudo apt-get update```
