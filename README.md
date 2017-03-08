@@ -1,4 +1,4 @@
-KATANA SDK for JAVA 7
+KATANA SDK for JAVA 8
 =====================
 
 [badges]
@@ -9,18 +9,18 @@ Requirements
 ------------
 
 * KATANA Framework 1.0+
-* JDK 1.7
+* JDK 1.8
 
 Installation
 ------------
 
-In order to install the SDK you need to install the JDK 1.7: 
+In order to install the SDK you need to install the JDK 1.8:
 
 #### JDK 1.7:
 
 1. ```sudo apt-add-repository ppa:webupd8team/java```
 2. ```sudo apt-get update```
-3. ```sudo apt-get install oracle-java7-installer```
+3. ```sudo apt-get install oracle-java8-installer```
 
 #### Build:
 
@@ -61,12 +61,9 @@ public class Service {
     public static void main(String[] args) {
         Service service = new Service(args);
 
-        service.action("actionName", new Callable<Action>() {
-               @Override
-               public Action run(Action action) {
-                   // logic ...
-                   return action;
-               }
+        service.action("actionName", action -> {
+               // logic ...
+               return action;
            });
 
         service.run();
@@ -87,20 +84,14 @@ public class Middleware {
     public static void main(String[] args) {
         Middleware middleware = new Middleware(args);
 
-        middleware.request(new Callable<Request>() {
-               @Override
-               public Request run(Request request) {
-                   // logic ...
-                   return request;
-               }
+        middleware.request(request -> {
+               // logic ...
+               return request;
            });
 
-        middleware.response(new Callable<Response>() {
-               @Override
-               public Response run(Response response) {
-                   // logic ...
-                   return response;
-               }
+        middleware.response(response -> {
+               // logic ...
+               return response;
            });
 
         middleware.run();
@@ -135,28 +126,25 @@ public class UserService {
         users.add(new User(5, "Hugo"));
 
         Service service = new Service(args);
-        service.action("read", new Callable<Action>() {
-               @Override
-               public Action run(Action action) {
-                   int userId = (Integer) action.getParam("id").getValue();
+        service.action("read", action -> {
+               int userId = (Integer) action.getParam("id").getValue();
 
-                   User entity = null;
-                   for (User user : users) {
-                       if (user.getId() == userId) {
-                           entity = user;
-                           break;
-                       }
+               User entity = null;
+               for (User user : users) {
+                   if (user.getId() == userId) {
+                       entity = user;
+                       break;
                    }
-
-                   if (entity == null) {
-                       action.error("User does not exist", 1, "404 Not Found");
-                   } else {
-                       action.setEntity(entity);
-                       action.setLink("self", "/0.1.0/users/" + userId);
-                   }
-
-                   return action;
                }
+
+               if (entity == null) {
+                   action.error("User does not exist", 1, "404 Not Found");
+               } else {
+                   action.setEntity(entity);
+                   action.setLink("self", "/0.1.0/users/" + userId);
+               }
+
+               return action;
            });
         service.run();
     }
@@ -179,43 +167,40 @@ public class Rest {
 
     public static void main(String[] args) {
         Middleware middleware = new Middleware(args);
-        middleware.request(new Callable<Request>() {
-               @Override
-               public Request run(Request request) {
-                   // /{version}/{service}/{extra}
+        middleware.request(request -> {
+               // /{version}/{service}/{extra}
 
-                   String[] parts = request.getHttpRequest().getUrlPath().split("/");
-                   request.setServiceVersion(parts[1]);
-                   request.setServiceName(parts[2]);
-                   boolean hasExtraPath = parts.length == 4 && !parts[3].isEmpty();
+               String[] parts = request.getHttpRequest().getUrlPath().split("/");
+               request.setServiceVersion(parts[1]);
+               request.setServiceName(parts[2]);
+               boolean hasExtraPath = parts.length == 4 && !parts[3].isEmpty();
 
-                   String method = request.getHttpRequest().getMethod();
+               String method = request.getHttpRequest().getMethod();
 
-                   String actionName = null;
-                   switch (method) {
-                       case "GET":
-                           actionName = hasExtraPath ? "read" : "list";
-                           break;
-                       case "POST":
-                           actionName = "create";
-                           break;
-                       case "PUT":
-                           actionName = "replace";
-                           break;
-                       case "PATCH":
-                           actionName = "update";
-                           break;
-                       case "DELETE":
-                           actionName = "delete";
-                           break;
-                   }
-
-                   if (actionName != null) {
-                       request.setActionName(actionName);
-                   }
-
-                   return request;
+               String actionName = null;
+               switch (method) {
+                   case "GET":
+                       actionName = hasExtraPath ? "read" : "list";
+                       break;
+                   case "POST":
+                       actionName = "create";
+                       break;
+                   case "PUT":
+                       actionName = "replace";
+                       break;
+                   case "PATCH":
+                       actionName = "update";
+                       break;
+                   case "DELETE":
+                       actionName = "delete";
+                       break;
                }
+
+               if (actionName != null) {
+                   request.setActionName(actionName);
+               }
+
+               return request;
            });
         middleware.run();
     }
