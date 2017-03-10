@@ -74,10 +74,10 @@ Then, create a file named `service.xml`, with the following configuration:
 Now, create a file named `middleware.class.java`, and add the following source code for the **Middleware**, which handles both a **Request** and a **Response**:
 
 ```java
-import com.katana.sdk.Middleware;
-import com.katana.sdk.Callable;
-import com.katana.sdk.Request;
-import com.katana.sdk.Response;
+import io.kusanagi.katana.sdk.Middleware;
+import io.kusanagi.katana.sdk.Callable;
+import io.kusanagi.katana.sdk.Request;
+import io.kusanagi.katana.sdk.Response;
 
 public class Middleware {
 
@@ -99,9 +99,9 @@ public class Middleware {
 And also create a file named `service.class.java`, and add the following source code for the **Service**, which registers an action:
 
 ```java
-import com.katana.sdk.Service;
-import com.katana.sdk.Callable;
-import com.katana.sdk.Action;
+import io.kusanagi.katana.sdk.Service;
+import io.kusanagi.katana.sdk.Callable;
+import io.kusanagi.katana.sdk.Action;
 
 public class Service {
 
@@ -124,9 +124,9 @@ The following example is a **Middleware** which translates HTTP requests to CRUD
 ```java
 package com.katana.example;
 
-import com.katana.sdk.Middleware;
-import com.katana.sdk.Callable;
-import com.katana.sdk.Request;
+import io.kusanagi.katana.sdk.Middleware;
+import io.kusanagi.katana.sdk.Callable;
+import io.kusanagi.katana.sdk.Request;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -170,9 +170,9 @@ The following example is a **Service** named "users", with a "read" action which
 ```java
 package com.katana.example;
 
-import com.katana.sdk.Service;
-import com.katana.sdk.Callable;
-import com.katana.sdk.Action;
+import io.kusanagi.katana.sdk.Service;
+import io.kusanagi.katana.sdk.Callable;
+import io.kusanagi.katana.sdk.Action;
 
 import java.util.ArrayList;
 import java.util.List;
