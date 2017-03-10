@@ -225,8 +225,9 @@ public class Api {
      */
     @JsonIgnore
     public ServiceSchema getServiceSchema(String name, String version) {
-        if (mapping.getServiceSchema().containsKey(name) && mapping.getServiceSchema().get(name).containsKey(version)) {
-            return mapping.getServiceSchema().get(name).get(version);
+        Map<String, Map<String, ServiceSchema>> serviceSchema = mapping.getServiceSchema();
+        if (serviceSchema != null && serviceSchema.containsKey(name) && serviceSchema.get(name).containsKey(version)) {
+            return serviceSchema.get(name).get(version);
         }
         throw new IllegalArgumentException(String.format(ExceptionMessage.CANNOT_RESOLVE_SCHEMA_FOR_SERVICE, name, version));
     }
@@ -249,51 +250,60 @@ public class Api {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Api)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         Api api = (Api) o;
 
-        if (isDebug() != api.isDebug()) {
+        if (isDebug != api.isDebug) {
             return false;
         }
-        if (getPath() != null ? !getPath().equals(api.getPath()) : api.getPath() != null) {
+        if (component != null ? !component.equals(api.component) : api.component != null) {
             return false;
         }
-        if (getName() != null ? !getName().equals(api.getName()) : api.getName() != null) {
+        if (path != null ? !path.equals(api.path) : api.path != null) {
             return false;
         }
-        if (getVersion() != null ? !getVersion().equals(api.getVersion()) : api.getVersion() != null) {
+        if (name != null ? !name.equals(api.name) : api.name != null) {
             return false;
         }
-        if (getPlatformVersion() != null ? !getPlatformVersion().equals(api.getPlatformVersion()) : api.getPlatformVersion() != null) {
+        if (version != null ? !version.equals(api.version) : api.version != null) {
             return false;
         }
-        return getVariables() != null ? getVariables().equals(api.getVariables()) : api.getVariables() == null;
-
+        if (platformVersion != null ? !platformVersion.equals(api.platformVersion) : api.platformVersion != null) {
+            return false;
+        }
+        if (variables != null ? !variables.equals(api.variables) : api.variables != null) {
+            return false;
+        }
+        return mapping != null ? mapping.equals(api.mapping) : api.mapping == null;
     }
 
     @Override
     public int hashCode() {
-        int result = getPath() != null ? getPath().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
-        result = 31 * result + (getVersion() != null ? getVersion().hashCode() : 0);
-        result = 31 * result + (getPlatformVersion() != null ? getPlatformVersion().hashCode() : 0);
-        result = 31 * result + (getVariables() != null ? getVariables().hashCode() : 0);
-        result = 31 * result + (isDebug() ? 1 : 0);
+        int result = component != null ? component.hashCode() : 0;
+        result = 31 * result + (path != null ? path.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        result = 31 * result + (platformVersion != null ? platformVersion.hashCode() : 0);
+        result = 31 * result + (variables != null ? variables.hashCode() : 0);
+        result = 31 * result + (isDebug ? 1 : 0);
+        result = 31 * result + (mapping != null ? mapping.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "Api{" +
-                "path='" + path + '\'' +
+                "component=" + component +
+                ", path='" + path + '\'' +
                 ", name='" + name + '\'' +
                 ", version='" + version + '\'' +
                 ", platformVersion='" + platformVersion + '\'' +
                 ", variables=" + variables +
                 ", isDebug=" + isDebug +
+                ", mapping=" + mapping +
                 '}';
     }
 }

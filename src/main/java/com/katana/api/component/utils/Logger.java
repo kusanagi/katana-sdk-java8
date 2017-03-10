@@ -73,7 +73,7 @@ public class Logger {
     }
 
     private static void logToStdout(String message) {
-        java.util.logging.Logger.getGlobal().log(Level.INFO, message);
+//        java.util.logging.Logger.getGlobal().log(Level.INFO, message);
         System.out.println(message);
     }
 }
