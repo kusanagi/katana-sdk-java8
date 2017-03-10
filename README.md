@@ -1,34 +1,29 @@
-KATANA SDK for JAVA 8
+KATANA SDK for Java 8
 =====================
 
-[badges]
-
-JAVA SDK to interface with the **KATANA**™ framework (https://katana.kusanagi.io).
+Java SDK to interface with the **KATANA**™ framework (https://katana.kusanagi.io).
 
 Requirements
 ------------
 
 * KATANA Framework 1.0+
-* JDK 1.8
+* [JDK](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) 1.8
 
 Installation
 ------------
 
-In order to install the SDK you need to install the JDK 1.8:
+To install and use the Java SDK you'll need to first install the JDK 1.8. To do so using **apt** you can run the following from the command-line:
 
-#### JDK 1.8:
+```
+$ sudo apt-add-repository ppa:webupd8team/java
+$ sudo apt-get update
+$ sudo apt-get install oracle-java8-installer
+```
 
-1. ```sudo apt-add-repository ppa:webupd8team/java```
-2. ```sudo apt-get update```
-3. ```sudo apt-get install oracle-java8-installer```
+The SDK can then be built with either [Maven](https://maven.apache.org) or [Gradle](https://gradle.org).
 
-#### Build:
+If using **Maven**, add the following in your `pom.xml` file:
 
-The **KATANA** SDK can be built with either Maven or Gradle:
-
-**Maven**:
-
-Add the following in `pom.xml`:
 ```xml
 <dependency>
     <groupId>com.kusanagi</groupId>
@@ -37,9 +32,8 @@ Add the following in `pom.xml`:
 </dependency>
 ```
 
-**Gradle**:
+Or, if using **Gradle**, add the following in your `build.gradle` file:
 
-Add the following in `build.gradle`:
 ```gradle
 dependencies {
     compile group: 'com.kusanagi', name: 'katana-sdk-java8', version: '1.0.0'
@@ -49,52 +43,75 @@ dependencies {
 Getting Started
 ---------------
 
-The **KATANA** SDK is fairly simple to use, the following is an example that uses the SDK to create a **Service** and run an action:
+The **KATANA**™ SDK is fairly simple to use. We begin by first defining the model of our components using configuration files.
 
-```java
-import com.katana.sdk.Action;
-import com.katana.sdk.Callable;
-import com.katana.sdk.Service;
+Here we'll use `XML`, but the framework also supports both `JSON` and `YAML` formats.
 
-public class Service {
+First, create a file named `middleware.xml`, with the following configuration:
 
-    public static void main(String[] args) {
-        Service service = new Service(args);
-
-        service.action("actionName", action -> {
-               // logic ...
-               return action;
-           });
-
-        service.run();
-    }
-}
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<middleware xmlns="urn:katana:middleware" name="middleware_name" version="middleware_version" protocol="urn:katana:protocol:http">
+    ...
+    <engine runner="urn:katana:runner:java8" path="middleware_file.jar">
+        <variable name="workers" value="5"/>
+    ...
+</middleware>
 ```
 
-The following is an example that uses the SDK to create a **Middleware** and handle both a **Request** and a **Response**:
+Then, create a file named `service.xml`, with the following configuration:
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="urn:katana:service" name="service_name" version="service_version">
+    ...
+    <engine runner="urn:katana:runner:java8" path="service_file.jar" process-min="1" process-max="1">
+        <variable name="workers" value="5"/>
+    ...
+</service>
+```
+
+Now, create a file named `middleware.class.java`, and add the following source code for the **Middleware**, which handles both a **Request** and a **Response**:
 
 ```java
+import com.katana.sdk.Middleware;
+import com.katana.sdk.Callable;
 import com.katana.sdk.Request;
 import com.katana.sdk.Response;
-import com.katana.sdk.Callable;
-import com.katana.sdk.Middleware;
 
 public class Middleware {
 
     public static void main(String[] args) {
         Middleware middleware = new Middleware(args);
-
         middleware.request(request -> {
-               // logic ...
-               return request;
-           });
-
+            // your logic here
+            return request;
+        });
         middleware.response(response -> {
-               // logic ...
-               return response;
-           });
-
+            // your logic here
+            return response;
+        });
         middleware.run();
+    }
+}
+```
+
+And also create a file named `service.class.java`, and add the following source code for the **Service**, which registers an action:
+
+```java
+import com.katana.sdk.Service;
+import com.katana.sdk.Callable;
+import com.katana.sdk.Action;
+
+public class Service {
+
+    public static void main(String[] args) {
+        Service service = new Service(args);
+        service.action("actionName", action -> {
+            // your logic here
+            return action;
+        });
+        service.run();
     }
 }
 ```
@@ -102,63 +119,14 @@ public class Middleware {
 Examples
 --------
 
-The following is a User **Service** with a read action, which retrieves a user from a List and returns the User according to the `user_id` parameter:
+The following example is a **Middleware** which translates HTTP requests to CRUD actions based on REST conventions:
 
 ```java
 package com.katana.example;
 
-import com.katana.sdk.Action;
-import com.katana.sdk.Callable;
-import com.katana.sdk.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-
-public class UserService {
-
-    public static void main(String[] args) {
-
-        final List<User> users = new ArrayList<>();
-        users.add(new User(1, "James"));
-        users.add(new User(2, "Jeronimo"));
-        users.add(new User(3, "Fernando"));
-        users.add(new User(4, "Ricardo"));
-        users.add(new User(5, "Hugo"));
-
-        Service service = new Service(args);
-        service.action("read", action -> {
-               int userId = (Integer) action.getParam("id").getValue();
-
-               User entity = null;
-               for (User user : users) {
-                   if (user.getId() == userId) {
-                       entity = user;
-                       break;
-                   }
-               }
-
-               if (entity == null) {
-                   action.error("User does not exist", 1, "404 Not Found");
-               } else {
-                   action.setEntity(entity);
-                   action.setLink("self", "/0.1.0/users/" + userId);
-               }
-
-               return action;
-           });
-        service.run();
-    }
-}
-```
-
-The following is a REST **Middleware** which translates HTTP requests to CRUD actions depending on the `verbs` and parameters:
-
-```java
-package com.katana.example;
-
-import com.katana.sdk.Request;
 import com.katana.sdk.Middleware;
 import com.katana.sdk.Callable;
+import com.katana.sdk.Request;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -168,41 +136,77 @@ public class Rest {
     public static void main(String[] args) {
         Middleware middleware = new Middleware(args);
         middleware.request(request -> {
-               // /{version}/{service}/{extra}
-
-               String[] parts = request.getHttpRequest().getUrlPath().split("/");
-               request.setServiceVersion(parts[1]);
-               request.setServiceName(parts[2]);
-               boolean hasExtraPath = parts.length == 4 && !parts[3].isEmpty();
-
-               String method = request.getHttpRequest().getMethod();
-
-               String actionName = null;
-               switch (method) {
-                   case "GET":
-                       actionName = hasExtraPath ? "read" : "list";
-                       break;
-                   case "POST":
-                       actionName = "create";
-                       break;
-                   case "PUT":
-                       actionName = "replace";
-                       break;
-                   case "PATCH":
-                       actionName = "update";
-                       break;
-                   case "DELETE":
-                       actionName = "delete";
-                       break;
-               }
-
-               if (actionName != null) {
-                   request.setActionName(actionName);
-               }
-
-               return request;
-           });
+            // the URL format expected is "/{version}/{service}/{extra}"
+            String[] parts = request.getHttpRequest().getUrlPath().split("/");
+            // set the Service version
+            request.setServiceVersion(parts[1]);
+            // set the Service name
+            request.setServiceName(parts[2]);
+            boolean hasExtraPath = parts.length == 4 && !parts[3].isEmpty();
+            String method = request.getHttpRequest().getMethod();
+            // resolve the Service action to call
+            switch (method) {
+                case "GET":
+                    return request.setActionName(hasExtraPath ? "read" : "list");
+                case "POST":
+                    return request.setActionName("create");
+                case "PUT":
+                    return request.setActionName("replace");
+                case "PATCH":
+                    return request.setActionName("update");
+                case "DELETE":
+                    return request.setActionName("delete");
+                default:
+                    return request.setActionName(actionName);
+            }
+        });
         middleware.run();
+    }
+}
+```
+
+The following example is a **Service** named "users", with a "read" action which retrieves a user from a `List` and returns the entity according to the `user_id` parameter:
+
+```java
+package com.katana.example;
+
+import com.katana.sdk.Service;
+import com.katana.sdk.Callable;
+import com.katana.sdk.Action;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class UserService {
+
+    public static void main(String[] args) {
+        Service service = new Service(args);
+        service.action("read", action -> {
+            // list of users, this would normally be a DB call
+            final List<User> users = new ArrayList<>();
+            users.add(new User(1, "James"));
+            users.add(new User(2, "Jeronimo"));
+            users.add(new User(3, "Fernando"));
+            users.add(new User(4, "Ricardo"));
+            users.add(new User(5, "Hugo"));
+            // read the incoming "id" parameter
+            int userId = (Integer) action.getParam("id").getValue();
+            User entity = null;
+            // find the user in the list
+            for (User user : users) {
+                if (user.getId() == userId) {
+                    entity = user;
+                    break;
+                }
+            }
+            if (entity == null) {
+                return action.error("User does not exist", 1, "404 Not Found");
+            }
+            action.setEntity(entity);
+            action.setLink("self", "/0.1.0/users/" + userId);
+            return action;
+        });
+        service.run();
     }
 }
 ```
