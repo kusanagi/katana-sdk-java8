@@ -26,7 +26,7 @@ If using **Maven**, add the following in your `pom.xml` file:
 
 ```xml
 <dependency>
-    <groupId>com.kusanagi</groupId>
+    <groupId>io.kusanagi</groupId>
     <artifactId>katana-sdk-java8</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -36,7 +36,7 @@ Or, if using **Gradle**, add the following in your `build.gradle` file:
 
 ```gradle
 dependencies {
-    compile group: 'com.kusanagi', name: 'katana-sdk-java8', version: '1.0.0'
+    compile group: 'io.kusanagi', name: 'katana-sdk-java8', version: '1.0.0'
 }
 ```
 
