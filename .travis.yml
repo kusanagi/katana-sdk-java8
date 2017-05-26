@@ -32,5 +32,8 @@ before_script:
 - cp -r src/test/java/resources build/classes/test/resources
 
 script:
-- ./gradlew test jacocoTestReport && ./gradlew jar
--
+- ./gradlew test && ./gradlew jar
+
+after_success:
+- ./gradlew jacocoTestReport coveralls
+- .utility/initiate-publish.sh

@@ -1,3 +1,18 @@
+/*
+ * Java 8 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
+ *
+ * Distributed under the MIT license
+ *
+ * For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code
+ *
+ * @link      https://github.com/kusanagi/katana-sdk-java8
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
+ *
+ */
+
 package io.kusanagi.katana.api.component;
 
 /**
@@ -80,9 +95,10 @@ public class Key {
     public static final String ACTION_SCHEMA_FILES = "f";
     public static final String ACTION_SCHEMA_ENTITY = "E";
     public static final String ACTION_SCHEMA_RELATIONS = "r";
-    public static final String ACTION_SCHEMA_RETURN_OBJECT = "R";
+    public static final String ACTION_SCHEMA_RETURN_OBJECT = "rv";
 
     //Call
+    public static final String CALL_DURATION = "D";
     public static final String CALL_NAME = "n";
     public static final String CALL_VERSION = "v";
     public static final String CALL_ACTION = "a";
@@ -193,6 +209,7 @@ public class Key {
     public static final String RESPONSE_HTTP_REQUEST = "r";
     public static final String RESPONSE_HTTP_RESPONSE = "R";
     public static final String RESPONSE_TRANSPORT = "T";
+    public static final String RESPONSE_RETURN = "rv";
 
     //Return Schema
     public static final String RETURN_SCHEMA_TYPE = "t";
@@ -229,6 +246,9 @@ public class Key {
     public static final String TRANSPORT_META_VERSION = "v";
     public static final String TRANSPORT_META_ID = "i";
     public static final String TRANSPORT_META_DATETIME = "d";
+    public static final String TRANSPORT_META_START_TIME = "s";
+    public static final String TRANSPORT_META_END_TIME = "e";
+    public static final String TRANSPORT_META_DURATION = "D";
     public static final String TRANSPORT_META_GATEWAY = "g";
     public static final String TRANSPORT_META_ORIGIN = "o";
     public static final String TRANSPORT_META_LEVEL = "l";

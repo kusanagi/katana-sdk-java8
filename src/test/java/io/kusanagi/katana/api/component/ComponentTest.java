@@ -1,3 +1,18 @@
+/*
+ * Java 7 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
+ *
+ * Distributed under the MIT license
+ *
+ * For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code
+ *
+ * @link      https://github.com/kusanagi/katana-sdk-java7
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
+ *
+ */
+
 package io.kusanagi.katana.api.component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,19 +25,20 @@ import io.kusanagi.katana.api.component.utils.MessagePackSerializer;
 import io.kusanagi.katana.api.replies.CallReplyPayload;
 import io.kusanagi.katana.api.replies.ResponseReplyPayload;
 import io.kusanagi.katana.api.replies.TransportReplyPayload;
-import io.kusanagi.katana.sdk.Error;
 import io.kusanagi.katana.utils.MockFactory;
 import io.kusanagi.katana.utils.TestClient;
 import io.kusanagi.katana.utils.TestMiddleware;
 import io.kusanagi.katana.utils.TestService;
 import io.kusanagi.katana.sdk.*;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,7 +74,7 @@ public class ComponentTest {
 
         this.addr = "tcp://" + System.getProperty("katanaip") + ":" + PORT;
 
-        String args = "-c service -n name -v 0.2.0 -f 0.1.0 -s socket -t " + PORT + " -d -C request:callback --debug " +
+        String args = "-c service -n name -v 0.2.0 -f 0.1.0 -s socket -t " + PORT + " -d -A list --debug " +
                 "-V var1=value1 -V var2=value2 --var var3=value3";
         this.component = new Service(args.split(" "));
 
@@ -113,14 +129,14 @@ public class ComponentTest {
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 -V name=value", true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 -t " + PORT, true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 -d", true);
-        assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 -C request:callback", true);
+        assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 -A list", true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 -q", true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 --socket socket", true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 --debug", true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 --var name=value", true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 --tcp " + PORT, true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 --disable-compact-names", true);
-        assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 --callback request:callback", true);
+        assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 --action list", true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 --quiet", true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 -s socket --debug -V name=value", true);
         assertComponentArgs("-c service -n name -v 0.1.0 -f 0.1.0 -s socket --debug -V name1=value -V name2=value --var name3=value", true);
@@ -128,7 +144,7 @@ public class ComponentTest {
 
     @Test
     public void main_withValidArguments_setClassMembers() {
-        String args = "-c service -n name -v 0.2.0 -f 0.1.0 -s socket -t " + PORT + " -d -C request:callback -q --debug " +
+        String args = "-c service -n name -v 0.2.0 -f 0.1.0 -s socket -t " + PORT + " -d -A list -q --debug " +
                 "-V var1=value1 -V var2=value2 --var var3=value3";
         Component component = new Service(args.split(" "));
 
@@ -139,7 +155,7 @@ public class ComponentTest {
         assertEquals(PORT, component.getTcp());
         assertEquals(true, component.isDebug());
         assertEquals(true, component.isQuiet());
-        assertEquals("request:callback", component.getCallback());
+        assertEquals("list", component.getAction());
         assertEquals("socket", component.getSocket());
         assertEquals(3, component.getVar().size());
         assertEquals("value1", component.getVar().get("var1"));
@@ -158,8 +174,8 @@ public class ComponentTest {
 
         assertTrue(component.hasResource("resource"));
         assertFalse(component.hasResource("resource2"));
-        assertEquals(callable, component.getResource("resource"));
-        assertEquals(null, component.getResource("resource2"));
+        Assert.assertEquals(callable, component.getResource("resource"));
+        Assert.assertEquals(null, component.getResource("resource2"));
     }
 
     @Test
@@ -179,7 +195,7 @@ public class ComponentTest {
 
     @Test
     public void log_notInDebugMode_dontPrintLogAndReturnFalse() throws ParseException {
-        String args = "-c service -n name -v 0.2.0 -f 0.1.0 -s socket -t " + PORT + " -C request:callback " +
+        String args = "-c service -n name -v 0.2.0 -f 0.1.0 -s socket -t " + PORT + " -A list " +
                 "-V var1=value1 -V var2=value2 --var var3=value3";
         Component service = new Service(args.split(" "));
 
@@ -235,7 +251,7 @@ public class ComponentTest {
 
         assertEquals(requestCommandPayload, requestCommandPayloads[0]);
         assertEquals(mapping, mappings[0]);
-        assertEquals(requestCommandPayload.getCommand().getArgument().getRequestCall(), callReplyPayloads[0].getCommandReply().getResult().getRequestCall());
+        Assert.assertEquals(requestCommandPayload.getCommand().getArgument().getRequestCall(), callReplyPayloads[0].getCommandReply().getResult().getRequestCall());
 
         Request request = requestCommandPayloads[0].getCommand().getArgument();
         assertRequest(request);
@@ -334,7 +350,7 @@ public class ComponentTest {
 
         assertEquals(responseCommandPayload, responseCommandPayloads[0]);
         assertEquals(mapping, mappings[0]);
-        assertEquals(responseCommandPayload.getCommand().getArgument().getHttpResponse(), responseReplyPayloads[0].getCommandReply().getResult().getHttpResponse());
+        Assert.assertEquals(responseCommandPayload.getCommand().getArgument().getHttpResponse(), responseReplyPayloads[0].getCommandReply().getResult().getHttpResponse());
 
         Response response = responseCommandPayloads[0].getCommand().getArgument();
         assertResponse(response);
@@ -409,8 +425,8 @@ public class ComponentTest {
             object.commit("create", params);
             object.rollback("create", params);
             object.complete("create", params);
-            object.deferCall("posts", "0.1.0", "read", params, null);
-            object.callRemote("http://192.168.55.10", "posts", "0.1.0", "read", params, null, 1000);
+//            object.deferCall("posts", "0.1.0", "read", params, null);
+//            object.callRemote("http://192.168.55.10", "posts", "0.1.0", "read", params, null, 1000);
             object.error("Unauthorized", 401, "401 Unauthorized");
             transports[0] = object.getTransport();
             countDownLatch.countDown();
@@ -585,12 +601,12 @@ public class ComponentTest {
         assertData((List) transport.getData("http://127.0.0.1:80", "users", "0.2.0", "read"));
 //        assertEquals("", transport.getRelations());
         assertLinks((Map) transport.getLinks("http://127.0.0.1:80", "users"));
-        assertCalls((List<Call>) ((Map) transport.getCalls("users")).get("0.2.0"));
+//        assertCalls((List<Call>) ((Map) transport.getCalls("users")).get("0.2.0"));
         assertTransactions(transport.getTransactions("users"));
-        assertErrors((List<Error>) ((Map) transport.getErrors("http://127.0.0.1:80", "users")).get("1.0.0"));
+        assertErrors((List<io.kusanagi.katana.sdk.Error>) ((Map) transport.getErrors("http://127.0.0.1:80", "users")).get("1.0.0"));
     }
 
-    private void assertErrors(List<Error> errors) {
+    private void assertErrors(List<io.kusanagi.katana.sdk.Error> errors) {
         assertEquals("The user does not exist", errors.get(0).getMessage());
         assertEquals(9, errors.get(0).getCode());
         assertEquals("404 Not Found", errors.get(0).getStatus());

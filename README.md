@@ -1,5 +1,6 @@
 KATANA SDK for Java 8
 =====================
+[![Build Status](https://travis-ci.org/kusanagi/katana-sdk-java8.svg?branch=master)](https://travis-ci.org/kusanagi/katana-sdk-java8) [![Coverage Status](https://coveralls.io/repos/github/kusanagi/katana-sdk-java8/badge.svg?branch=master)](https://coveralls.io/github/kusanagi/katana-sdk-java8?branch=master) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Java SDK to interface with the **KATANA**™ framework (https://katana.kusanagi.io).
 
@@ -84,12 +85,14 @@ public class Middleware {
     public static void main(String[] args) {
         Middleware middleware = new Middleware(args);
         middleware.request(request -> {
-            // your logic here
-            return request;
+                // your logic here
+                return request;
+            }
         });
         middleware.response(response -> {
-            // your logic here
-            return response;
+                // your logic here
+                return response;
+            }
         });
         middleware.run();
     }
@@ -108,8 +111,9 @@ public class Service {
     public static void main(String[] args) {
         Service service = new Service(args);
         service.action("actionName", action -> {
-            // your logic here
-            return action;
+                // your logic here
+                return action;
+            }
         });
         service.run();
     }
@@ -136,28 +140,29 @@ public class Rest {
     public static void main(String[] args) {
         Middleware middleware = new Middleware(args);
         middleware.request(request -> {
-            // the URL format expected is "/{version}/{service}/{extra}"
-            String[] parts = request.getHttpRequest().getUrlPath().split("/");
-            // set the Service version
-            request.setServiceVersion(parts[1]);
-            // set the Service name
-            request.setServiceName(parts[2]);
-            boolean hasExtraPath = parts.length == 4 && !parts[3].isEmpty();
-            String method = request.getHttpRequest().getMethod();
-            // resolve the Service action to call
-            switch (method) {
-                case "GET":
-                    return request.setActionName(hasExtraPath ? "read" : "list");
-                case "POST":
-                    return request.setActionName("create");
-                case "PUT":
-                    return request.setActionName("replace");
-                case "PATCH":
-                    return request.setActionName("update");
-                case "DELETE":
-                    return request.setActionName("delete");
-                default:
-                    return request.setActionName(actionName);
+                // the URL format expected is "/{version}/{service}/{extra}"
+                String[] parts = request.getHttpRequest().getUrlPath().split("/");
+                // set the Service version
+                request.setServiceVersion(parts[1]);
+                // set the Service name
+                request.setServiceName(parts[2]);
+                boolean hasExtraPath = parts.length == 4 && !parts[3].isEmpty();
+                String method = request.getHttpRequest().getMethod();
+                // resolve the Service action to call
+                switch (method) {
+                    case "GET":
+                        return request.setActionName(hasExtraPath ? "read" : "list");
+                    case "POST":
+                        return request.setActionName("create");
+                    case "PUT":
+                        return request.setActionName("replace");
+                    case "PATCH":
+                        return request.setActionName("update");
+                    case "DELETE":
+                        return request.setActionName("delete");
+                    default:
+                        return request.setActionName(actionName);
+                }
             }
         });
         middleware.run();
@@ -182,29 +187,30 @@ public class UserService {
     public static void main(String[] args) {
         Service service = new Service(args);
         service.action("read", action -> {
-            // list of users, this would normally be a DB call
-            final List<User> users = new ArrayList<>();
-            users.add(new User(1, "James"));
-            users.add(new User(2, "Jeronimo"));
-            users.add(new User(3, "Fernando"));
-            users.add(new User(4, "Ricardo"));
-            users.add(new User(5, "Hugo"));
-            // read the incoming "id" parameter
-            int userId = (Integer) action.getParam("id").getValue();
-            User entity = null;
-            // find the user in the list
-            for (User user : users) {
-                if (user.getId() == userId) {
-                    entity = user;
-                    break;
+                // list of users, this would normally be a DB call
+                final List<User> users = new ArrayList<>();
+                users.add(new User(1, "James"));
+                users.add(new User(2, "Jeronimo"));
+                users.add(new User(3, "Fernando"));
+                users.add(new User(4, "Ricardo"));
+                users.add(new User(5, "Hugo"));
+                // read the incoming "id" parameter
+                int userId = (Integer) action.getParam("id").getValue();
+                User entity = null;
+                // find the user in the list
+                for (User user : users) {
+                    if (user.getId() == userId) {
+                        entity = user;
+                        break;
+                    }
                 }
+                if (entity == null) {
+                    return action.error("User does not exist", 1, "404 Not Found");
+                }
+                action.setEntity(entity);
+                action.setLink("self", "/0.1.0/users/" + userId);
+                return action;
             }
-            if (entity == null) {
-                return action.error("User does not exist", 1, "404 Not Found");
-            }
-            action.setEntity(entity);
-            action.setLink("self", "/0.1.0/users/" + userId);
-            return action;
         });
         service.run();
     }
