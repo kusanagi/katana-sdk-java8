@@ -139,6 +139,8 @@ uploadArchives {
 }
 
 nexusStaging {
+    username = ossrhUsername
+    password = ossrhPassword
     packageGroup = "io.kusanagi" //optional if packageGroup == project.getGroup()
     stagingProfileId = "io.kusanagi" //when not defined will be got from server using "packageGroup"
 }
