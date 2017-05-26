@@ -22,6 +22,8 @@ group 'io.kusanagi'
 archivesBaseName = "katana-sdk-java8"
 version '1.0'
 
+mainClassName = 'io.kusanagi.katana.api.component.Component'
+
 applicationDefaultJvmArgs = ["-Djava.library.path=/usr/local/lib -Dkatanaip=127.0.0.1"]
 
 sourceCompatibility = 1.8
