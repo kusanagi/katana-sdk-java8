@@ -408,7 +408,7 @@ public class Action extends Api {
         primaryKeyRelation.put(path, relation);
 
         Map<String, Map<String, Map<String, Object>>> nameRelation = new HashMap<>();
-        nameRelation.put(name, primaryKeyRelation);
+        nameRelation.put(primaryKey, primaryKeyRelation);
 
         if (relations.containsKey(path)) {
             if (relations.get(path).containsKey(name)) {
@@ -426,7 +426,7 @@ public class Action extends Api {
             }
         } else {
             Map<String, Map<String, Map<String, Map<String, Object>>>> pathRelation = new HashMap<>();
-            pathRelation.put(path, nameRelation);
+            pathRelation.put(name, nameRelation);
             relations.put(path, pathRelation);
         }
 
@@ -454,7 +454,7 @@ public class Action extends Api {
         primaryKeyRelation.put(path, relation);
 
         Map<String, Map<String, Map<String, Object>>> nameRelation = new HashMap<>();
-        nameRelation.put(name, primaryKeyRelation);
+        nameRelation.put(primaryKey, primaryKeyRelation);
 
         if (relations.containsKey(path)) {
             if (relations.get(path).containsKey(name)) {
@@ -472,7 +472,7 @@ public class Action extends Api {
             }
         } else {
             Map<String, Map<String, Map<String, Map<String, Object>>>> pathRelation = new HashMap<>();
-            pathRelation.put(path, nameRelation);
+            pathRelation.put(name, nameRelation);
             relations.put(path, pathRelation);
         }
 
@@ -500,10 +500,10 @@ public class Action extends Api {
         relation.put(service, foreignKey);
 
         Map<String, Map<String, Object>> primaryKeyRelation = new HashMap<>();
-        primaryKeyRelation.put(path, relation);
+        primaryKeyRelation.put(address, relation);
 
         Map<String, Map<String, Map<String, Object>>> nameRelation = new HashMap<>();
-        nameRelation.put(name, primaryKeyRelation);
+        nameRelation.put(primaryKey, primaryKeyRelation);
 
         if (relations.containsKey(path)) {
             if (relations.get(path).containsKey(name)) {
@@ -521,7 +521,7 @@ public class Action extends Api {
             }
         } else {
             Map<String, Map<String, Map<String, Map<String, Object>>>> pathRelation = new HashMap<>();
-            pathRelation.put(path, nameRelation);
+            pathRelation.put(name, nameRelation);
             relations.put(path, pathRelation);
         }
         return this;
@@ -548,10 +548,10 @@ public class Action extends Api {
         relation.put(service, foreignKey);
 
         Map<String, Map<String, Object>> primaryKeyRelation = new HashMap<>();
-        primaryKeyRelation.put(path, relation);
+        primaryKeyRelation.put(address, relation);
 
         Map<String, Map<String, Map<String, Object>>> nameRelation = new HashMap<>();
-        nameRelation.put(name, primaryKeyRelation);
+        nameRelation.put(primaryKey, primaryKeyRelation);
 
         if (relations.containsKey(path)) {
             if (relations.get(path).containsKey(name)) {
@@ -569,7 +569,7 @@ public class Action extends Api {
             }
         } else {
             Map<String, Map<String, Map<String, Map<String, Object>>>> pathRelation = new HashMap<>();
-            pathRelation.put(path, nameRelation);
+            pathRelation.put(name, nameRelation);
             relations.put(path, pathRelation);
         }
         return this;
