@@ -1,0 +1,5 @@
+projectKey=katana-sdk-java8
+serverUrl=http://localhost:9000
+dashboardUrl=http://localhost:9000/dashboard/index/katana-sdk-java8
+ceTaskId=AVqqUMAmXkSZdfw0z9SU
+ceTaskUrl=http://localhost:9000/api/ce/task?id=AVqqUMAmXkSZdfw0z9SU

@@ -1,3 +1,18 @@
+/*
+ * Java 8 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
+ *
+ * Distributed under the MIT license
+ *
+ * For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code
+ *
+ * @link      https://github.com/kusanagi/katana-sdk-java8
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
+ *
+ */
+
 package io.kusanagi.katana.sdk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -5,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.kusanagi.katana.api.Api;
 import io.kusanagi.katana.api.commands.CallCommandPayload;
+import io.kusanagi.katana.api.commands.common.CommandMeta;
 import io.kusanagi.katana.api.component.Constants;
 import io.kusanagi.katana.api.component.ExceptionMessage;
 import io.kusanagi.katana.api.component.Key;
@@ -170,13 +186,13 @@ public class Action extends Api {
     /**
      * Create a new parameter with the REQUIRED name argument
      * If the OPTIONAL value or type arguments are specified these MUST also be applied to the Param object. The value
-     * of the type argument MUST be either "null", "boolean", "integer", "float", "string", "array" or "object", where
+     * of the type argument MUST be either "null", "boolean", "integer", "float", "string", "array", "object" or "binary", where
      * any other value MUST be accepted as "string".
      * When creating a new Param object the value of the exists property MUST be false.
      *
      * @param name  Name of the new param
      * @param value Value of the new param
-     * @param type  Data type of the new param, MUST be either "null", "boolean", "integer", "float", "string", "array" or "object"
+     * @param type  Data type of the new param, MUST be either "null", "boolean", "integer", "float", "string", "array", "object" or "binary"
      * @return Return the new param
      */
     public Param newParam(String name, String value, String type) {
@@ -304,7 +320,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action setDownload(File file) {
-        if (!getServiceSchema(getName(), getVersion()).hasFileServer()) {
+        if (mapping != null && !getServiceSchema(getName(), getVersion()).hasFileServer()) {
             throw new IllegalArgumentException(String.format(ExceptionMessage.FILE_SERVER_NOT_CONFIGURED, getName(), getVersion()));
         }
         this.transport.setBody(file);
@@ -687,7 +703,7 @@ public class Action extends Api {
 
         // Validate is there are local files
         if (files != null) {
-            if (!getServiceSchema(this.name, this.version).hasFileServer()) {
+            if (mapping != null && !getServiceSchema(this.name, this.version).hasFileServer()) {
                 return false;
             }
             for (File file : files) {
@@ -706,16 +722,22 @@ public class Action extends Api {
         callee.setFiles(files);
 
         CallCommandPayload.CallCommand callCommand = new CallCommandPayload.CallCommand();
+        callCommand.setName("runtime-call");
         callCommand.setArgument(callee);
 
+        CommandMeta callCommandMeta = new CommandMeta();
+        callCommandMeta.setScope("service");
+
         CallCommandPayload payload = new CallCommandPayload();
+        payload.setCommandMeta(callCommandMeta);
         payload.setCommand(callCommand);
 
         // Send Payload
         Serializer serializer = new MessagePackSerializer();
         ZMQ.Context context = ZMQ.context(1);
         ZMQ.Socket requester = context.socket(ZMQ.REQ);
-        requester.connect("tcp://" + serviceSchema.getAddress());
+        String addr = "tcp://" + serviceSchema.getAddress();
+        requester.connect(addr);
         requester.send(new byte[]{0x01}, zmq.ZMQ.ZMQ_SNDMORE);
         try {
             requester.send(serializer.serializeInBytes(payload), 0);
@@ -725,64 +747,79 @@ public class Action extends Api {
         }
 
         // Receive Reply
-        ZMQ.Socket receiver = context.socket(ZMQ.REP);
-        byte[] response = receiver.recv();
+        ZMQ.Poller poll = new ZMQ.Poller(1);
+        poll.register(requester, ZMQ.Poller.POLLIN);
+        int response = poll.poll(timeout);
 
-        // Close sockets and terminate context
-        receiver.close();
+        byte[] bytes;
+        if (response > 0) {
+            bytes = requester.recv();
+
+            // Parse Reply
+            ReturnReplyPayload returnCommandReply;
+            ErrorPayload errorPayload;
+            try {
+
+                // Extract return and return it
+                returnCommandReply = serializer.deserialize(bytes, ReturnReplyPayload.class);
+
+//                //Merge transports
+                Transport responseTransport = returnCommandReply.getCommandReply().getResult().getTransport();
+                merge(this.transport.getMeta().getFallback(), responseTransport.getMeta().getFallback());
+                merge(this.transport.getMeta().getProperties(), responseTransport.getMeta().getProperties());
+                merge(this.transport.getData(), responseTransport.getData());
+                merge(this.transport.getRelations(), responseTransport.getRelations());
+                merge(this.transport.getLinks(), responseTransport.getLinks());
+                merge(this.transport.getCalls(), responseTransport.getCalls());
+                merge(this.transport.getTransactions().getCommit(), responseTransport.getTransactions().getCommit());
+                merge(this.transport.getTransactions().getComplete(), responseTransport.getTransactions().getComplete());
+                merge(this.transport.getTransactions().getRollback(), responseTransport.getTransactions().getRollback());
+                merge(this.transport.getErrors(), responseTransport.getErrors());
+                this.transport.setBody(responseTransport.getBody());
+                merge(this.transport.getFiles(), responseTransport.getFiles());
+
+                return returnCommandReply.getCommandReply().getResult().getReturnObject();
+            } catch (IOException e) {
+                try {
+                    // Throw Error Payload as exception
+                    errorPayload = serializer.deserialize(bytes, ErrorPayload.class);
+                    Logger.log(e);
+                    throw new IllegalArgumentException(errorPayload.getError().getMessage());
+                } catch (IOException e1) {
+                    Logger.log(e1);
+                    // Throw serialization exception
+                    throw new IllegalArgumentException(e.getMessage());
+                }
+            } finally {
+                // Close sockets and terminate context
+                requester.close();
+                context.term();
+            }
+        }
+
         requester.close();
         context.term();
 
-        // Parse Reply
-        ReturnReplyPayload.ReturnCommandReply returnCommandReply;
-        ErrorPayload errorPayload;
-        try {
-            // Extract return and return it
-            returnCommandReply = serializer.deserialize(response, ReturnReplyPayload.ReturnCommandReply.class);
+        throw new RuntimeException("Runtime call timeout");
+    }
 
-            //Merge transports
-            Transport responseTransport = returnCommandReply.getResult().getTransport();
-            merge(this.transport.getMeta().getFallback(), responseTransport.getMeta().getFallback());
-            merge(this.transport.getMeta().getProperties(), responseTransport.getMeta().getProperties());
-            merge(this.transport.getData(), responseTransport.getData());
-            merge(this.transport.getRelations(), responseTransport.getRelations());
-            merge(this.transport.getLinks(), responseTransport.getLinks());
-            merge(this.transport.getCalls(), responseTransport.getCalls());
-            merge(this.transport.getTransactions().getCommit(), responseTransport.getTransactions().getCommit());
-            merge(this.transport.getTransactions().getComplete(), responseTransport.getTransactions().getComplete());
-            merge(this.transport.getTransactions().getRollback(), responseTransport.getTransactions().getRollback());
-            merge(this.transport.getErrors(), responseTransport.getErrors());
-            this.transport.setBody(responseTransport.getBody());
-            merge(this.transport.getFiles(), responseTransport.getFiles());
-
-            return returnCommandReply.getResult().getReturnObject();
-        } catch (IOException e) {
-            Logger.log(e);
-            try {
-                // Throw Error Payload as exception
-                errorPayload = serializer.deserialize(response, ErrorPayload.class);
-                throw new IllegalArgumentException(errorPayload.getError().getMessage());
-            } catch (IOException e1) {
-                Logger.log(e1);
-                // Throw serialization exception
-                throw new IllegalArgumentException(e.getMessage());
+    private void merge(List list1, List list2) {
+        if (list2 != null && list1 != null) {
+            for (Object object : list2) {
+                list1.add(object);
             }
         }
     }
 
-    private void merge(List list1, List list2) {
-        for (Object object : list2) {
-            list1.add(object);
-        }
-    }
-
     private void merge(Map map1, Map map2) {
-        for (Map.Entry<String, Object> entry : ((Map<String, Object>) map2).entrySet()) {
-            Object object = map2.get(entry.getKey());
-            if (map1.containsKey(entry.getKey()) && map1.get(entry.getKey()) instanceof Map && object instanceof Map) {
-                merge((Map) map1.get(entry.getKey()), (Map) object);
-            } else {
-                map1.put(entry.getKey(), map2.get(entry.getKey()));
+        if (map2 != null && map1 != null) {
+            for (Map.Entry<String, Object> entry : ((Map<String, Object>) map2).entrySet()) {
+                Object object = map2.get(entry.getKey());
+                if (map1.containsKey(entry.getKey()) && map1.get(entry.getKey()) instanceof Map && object instanceof Map) {
+                    merge((Map) map1.get(entry.getKey()), (Map) object);
+                } else {
+                    map1.put(entry.getKey(), map2.get(entry.getKey()));
+                }
             }
         }
     }
@@ -802,13 +839,13 @@ public class Action extends Api {
     public Action deferCall(String service, String version, String action, List<Param> params, List<File> files) {
         ServiceSchema serviceSchema = getServiceSchema(this.name, this.version);
 
-        if (!serviceSchema.getActionSchema(this.actionName).hasDeferCalls()) {
+        if (mapping != null && !serviceSchema.getActionSchema(this.actionName).hasDeferCall(service, version, action)) {
             throw new IllegalArgumentException(String.format(ExceptionMessage.DEFERRED_CALL_NOT_CONFIGURED, this.name, this.version, this.actionName));
         }
 
         if (files != null) {
             for (File file : files) {
-                if (file.isLocal() && !serviceSchema.hasFileServer()) {
+                if (file.isLocal() && mapping != null && !serviceSchema.hasFileServer()) {
                     throw new IllegalArgumentException(String.format(
                             ExceptionMessage.FILE_SERVER_NOT_CONFIGURED,
                             this.name,
@@ -825,6 +862,13 @@ public class Action extends Api {
             transport.setCalls(calls);
         }
 
+        Call call = new Call();
+        call.setName(service);
+        call.setVersion(version);
+        call.setAction(action);
+        call.setCaller(this.actionName);
+        call.setParams(params);
+
         List<Call> callList = new ArrayList<>();
 
         Map<String, List<Call>> versionCalls = new HashMap<>();
@@ -840,12 +884,8 @@ public class Action extends Api {
             calls.put(this.name, versionCalls);
         }
 
-        Call call = new Call();
-        call.setName(service);
-        call.setVersion(version);
-        call.setAction(action);
-        call.setParams(params);
         callList.add(call);
+
         return this;
     }
 
@@ -866,13 +906,13 @@ public class Action extends Api {
     public Action callRemote(String address, String service, String version, String action, List<Param> params, List<File> files, int timeout) {
         ServiceSchema serviceSchema = getServiceSchema(this.name, this.version);
 
-        if (!serviceSchema.getActionSchema(this.actionName).hasRemoteCalls()) {
+        if (mapping != null && !serviceSchema.getActionSchema(this.actionName).hasRemoteCalls()) {
             throw new IllegalArgumentException(String.format(ExceptionMessage.REMOTE_CALL_NOT_CONFIGURED, address, this.name, this.version, this.actionName));
         }
 
         if (files != null) {
             for (File file : files) {
-                if (file.isLocal() && !serviceSchema.hasFileServer()) {
+                if (file.isLocal() && mapping != null && !serviceSchema.hasFileServer()) {
                     throw new IllegalArgumentException(String.format(
                             ExceptionMessage.FILE_SERVER_NOT_CONFIGURED,
                             this.name,
@@ -903,6 +943,7 @@ public class Action extends Api {
         call.setName(service);
         call.setVersion(version);
         call.setAction(action);
+        call.setCaller(this.actionName);
         call.setTimeout(timeout);
         call.setParams(params);
         callList.add(call);
@@ -970,13 +1011,13 @@ public class Action extends Api {
         ServiceSchema serviceSchema = getServiceSchema(getName(), getVersion());
         ActionSchema actionSchema = serviceSchema.getActionSchema(getActionName());
 
-        if (actionSchema.hasReturn()) {
+        if (!actionSchema.hasReturn()) {
             throw new IllegalArgumentException(String.format(ExceptionMessage.CANNOT_SET_A_RETURN_VALUE, getName(), getVersion(), getActionName()));
         }
 
+        this.returnObject = returnObject;
         validateReturnObjectType(actionSchema.getReturnType());
 
-        this.returnObject = returnObject;
     }
 
     private void validateReturnObjectType(String returnType) {

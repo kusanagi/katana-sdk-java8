@@ -1,3 +1,18 @@
+/*
+ * Java 8 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
+ *
+ * Distributed under the MIT license
+ *
+ * For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code
+ *
+ * @link      https://github.com/kusanagi/katana-sdk-java8
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
+ *
+ */
+
 package io.kusanagi.katana.sdk;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -23,6 +38,15 @@ public class TransportMeta {
 
     @JsonProperty(Key.TRANSPORT_META_DATETIME)
     private String datetime;
+
+    @JsonProperty(Key.TRANSPORT_META_START_TIME)
+    private String startTime;
+
+    @JsonProperty(Key.TRANSPORT_META_END_TIME)
+    private String endTime;
+
+    @JsonProperty(Key.TRANSPORT_META_DURATION)
+    private int duration;
 
     @JsonProperty(Key.TRANSPORT_META_GATEWAY)
     private List<String> gateway;
@@ -79,6 +103,30 @@ public class TransportMeta {
         this.datetime = datetime;
     }
 
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
     public List<String> getGateway() {
         return gateway;
     }
@@ -130,6 +178,9 @@ public class TransportMeta {
 
         TransportMeta that = (TransportMeta) o;
 
+        if (duration != that.duration) {
+            return false;
+        }
         if (level != that.level) {
             return false;
         }
@@ -140,6 +191,12 @@ public class TransportMeta {
             return false;
         }
         if (datetime != null ? !datetime.equals(that.datetime) : that.datetime != null) {
+            return false;
+        }
+        if (startTime != null ? !startTime.equals(that.startTime) : that.startTime != null) {
+            return false;
+        }
+        if (endTime != null ? !endTime.equals(that.endTime) : that.endTime != null) {
             return false;
         }
         if (gateway != null ? !gateway.equals(that.gateway) : that.gateway != null) {
@@ -160,6 +217,9 @@ public class TransportMeta {
         int result = version != null ? version.hashCode() : 0;
         result = 31 * result + (id != null ? id.hashCode() : 0);
         result = 31 * result + (datetime != null ? datetime.hashCode() : 0);
+        result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
+        result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
+        result = 31 * result + duration;
         result = 31 * result + (gateway != null ? gateway.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(origin);
         result = 31 * result + level;
@@ -174,6 +234,9 @@ public class TransportMeta {
                 "version='" + version + '\'' +
                 ", id='" + id + '\'' +
                 ", datetime='" + datetime + '\'' +
+                ", startTime='" + startTime + '\'' +
+                ", endTime='" + endTime + '\'' +
+                ", duration=" + duration +
                 ", gateway=" + gateway +
                 ", origin=" + Arrays.toString(origin) +
                 ", level=" + level +

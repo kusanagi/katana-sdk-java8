@@ -147,7 +147,7 @@
           "n": "posts"
         }
       ],
-      "R": {
+      "rv": {
         "t": "integer",
         "e": false
       },

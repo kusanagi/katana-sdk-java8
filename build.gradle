@@ -1,8 +1,24 @@
+/*
+ * Java 8 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
+ *
+ * Distributed under the MIT license
+ *
+ * For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code
+ *
+ * @link      https://github.com/kusanagi/katana-sdk-java8
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
+ *
+ */
+
 group 'com.katana.sdk'
 version '1.0'
 
 apply plugin: 'application'
 apply plugin: "jacoco"
+apply plugin: 'nexus'
 
 applicationDefaultJvmArgs = ["-Djava.library.path=/usr/local/lib -Dkatanaip=127.0.0.1"]
 
@@ -28,6 +44,20 @@ jar {
         }
     }
 }
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
+        classpath 'org.gradle.api.plugins:gradle-nexus-plugin:0.6.1'
+    }
+}
+
+apply plugin: "com.github.kt3k.coveralls"
 
 jacocoTestReport {
     reports {

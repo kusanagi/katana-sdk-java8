@@ -1,3 +1,18 @@
+/*
+ * Java 8 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
+ *
+ * Distributed under the MIT license
+ *
+ * For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code
+ *
+ * @link      https://github.com/kusanagi/katana-sdk-java8
+ * @license   http://www.opensource.org/licenses/mit-license.php MIT License
+ * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
+ *
+ */
+
 package io.kusanagi.katana.api.component.utils;
 
 import java.text.SimpleDateFormat;
@@ -13,6 +28,7 @@ public class Logger {
     public static final int WARNING = 2;
     public static final int ERROR = 3;
     public static final int DEBUG = 4;
+
     public static final String STANDARD_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     public static final String LOG_PATTERN = "%s [%s] [SDK] %s";
 
