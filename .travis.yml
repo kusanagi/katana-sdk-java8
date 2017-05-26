@@ -44,4 +44,3 @@ script:
 after_success:
 - ./gradlew jacocoTestReport coveralls
 - .utility/initiate-publish.sh
-- ./gradlew closeAndReleaseRepository
