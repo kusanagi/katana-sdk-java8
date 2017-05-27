@@ -10,7 +10,7 @@ if [ "$TRAVIS_REPO_SLUG" == "kusanagi/katana-sdk-java8" ] && [ "$TRAVIS_PULL_REQ
 
   if [ $RETVAL -eq 0 ]; then
     echo 'Completed publish!'
-    ./gradlew closeAndReleaseRepository
+    ./gradlew -PossrhUsername="${SONATYPE_USERNAME}" -PossrhPassword="${SONATYPE_PASSWORD}" closeAndReleaseRepository
     RETVAL=$?
 
     if [ $RETVAL -eq 0 ]; then
