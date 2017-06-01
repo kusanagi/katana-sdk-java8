@@ -33,7 +33,7 @@ If using **Maven**, add the following in your `pom.xml` file:
 <dependency>
     <groupId>io.kusanagi</groupId>
     <artifactId>katana-sdk-java8</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@ Or, if using **Gradle**, add the following in your `build.gradle` file:
 
 ```gradle
 dependencies {
-    compile group: 'io.kusanagi', name: 'katana-sdk-java8', version: '1.0.0'
+    compile group: 'io.kusanagi', name: 'katana-sdk-java8', version: '1.1.0'
 }
 ```
 
@@ -58,7 +58,7 @@ First, create a file named `middleware.xml`, with the following configuration:
 <?xml version="1.0" encoding="UTF-8"?>
 <middleware xmlns="urn:katana:middleware" name="middleware_name" version="middleware_version" protocol="urn:katana:protocol:http">
     ...
-    <engine runner="urn:katana:runner:java8" path="middleware_file.jar">
+    <engine runner="urn:katana:runner:java8" path="middleware_file.jar" single-process=true>
         <variable name="workers" value="5"/>
     ...
 </middleware>
@@ -70,7 +70,7 @@ Then, create a file named `service.xml`, with the following configuration:
 <?xml version="1.0" encoding="UTF-8"?>
 <service xmlns="urn:katana:service" name="service_name" version="service_version">
     ...
-    <engine runner="urn:katana:runner:java8" path="service_file.jar" process-min="1" process-max="1">
+    <engine runner="urn:katana:runner:java8" path="service_file.jar" single-process=true>
         <variable name="workers" value="5"/>
     ...
 </service>
