@@ -1,14 +1,18 @@
 KATANA SDK for Java 8
 =====================
-[![Build Status](https://travis-ci.org/kusanagi/katana-sdk-java8.svg?branch=master)](https://travis-ci.org/kusanagi/katana-sdk-java8) [![Coverage Status](https://coveralls.io/repos/github/kusanagi/katana-sdk-java8/badge.svg?branch=master)](https://coveralls.io/github/kusanagi/katana-sdk-java8?branch=master) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-Java SDK to interface with the **KATANA**™ framework (https://katana.kusanagi.io).
+[![Build Status](https://travis-ci.org/kusanagi/katana-sdk-java8.svg?branch=master)](https://travis-ci.org/kusanagi/katana-sdk-java8)
+[![Coverage Status](https://coveralls.io/repos/github/kusanagi/katana-sdk-java8/badge.svg?branch=master)](https://coveralls.io/github/kusanagi/katana-sdk-java8?branch=master)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+Java SDK to interface with the **KATANA**™ framework (https://kusanagi.io).
 
 Requirements
 ------------
 
-* KATANA Framework 1.0+
+* KATANA Framework 1.1
 * [JDK](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) 1.8
+* [libzmq](http://zeromq.org/intro:get-the-software) 4.1.5+
 
 Installation
 ------------
@@ -29,7 +33,7 @@ If using **Maven**, add the following in your `pom.xml` file:
 <dependency>
     <groupId>io.kusanagi</groupId>
     <artifactId>katana-sdk-java8</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -37,7 +41,7 @@ Or, if using **Gradle**, add the following in your `build.gradle` file:
 
 ```gradle
 dependencies {
-    compile group: 'io.kusanagi', name: 'katana-sdk-java8', version: '1.0.0'
+    compile group: 'io.kusanagi', name: 'katana-sdk-java8', version: '1.1.0'
 }
 ```
 
@@ -54,7 +58,7 @@ First, create a file named `middleware.xml`, with the following configuration:
 <?xml version="1.0" encoding="UTF-8"?>
 <middleware xmlns="urn:katana:middleware" name="middleware_name" version="middleware_version" protocol="urn:katana:protocol:http">
     ...
-    <engine runner="urn:katana:runner:java8" path="middleware_file.jar">
+    <engine runner="urn:katana:runner:java8" path="middleware_file.jar" single-process=true>
         <variable name="workers" value="5"/>
     ...
 </middleware>
@@ -66,7 +70,7 @@ Then, create a file named `service.xml`, with the following configuration:
 <?xml version="1.0" encoding="UTF-8"?>
 <service xmlns="urn:katana:service" name="service_name" version="service_version">
     ...
-    <engine runner="urn:katana:runner:java8" path="service_file.jar" process-min="1" process-max="1">
+    <engine runner="urn:katana:runner:java8" path="service_file.jar" single-process=true>
         <variable name="workers" value="5"/>
     ...
 </service>
@@ -220,30 +224,30 @@ public class UserService {
 Documentation
 -------------
 
-See the [API](https://kusanagi.io/app#katana/docs/sdk) for a technical reference of the SDK, or read the full [specification](https://kusanagi.io/app#katana/docs/sdk/specification).
+See the [API](https://app.kusanagi.io#katana/docs/sdk) for a technical reference of the SDK.
 
-For help using the framework check the [documentation](https://kusanagi.io/app#katana/docs), or join the [community](https://kusanagi.io/app#katana/community).
+For help using the framework check the [documentation](https://app.kusanagi.io#katana/docs), or join the [community](https://app.kusanagi.io#katana/community).
 
 Support
 -------
 
-Please first read our [contribution guidelines](https://kusanagi.io/app#katana/open-source/contributing).
+Please first read our [contribution guidelines](https://app.kusanagi.io#katana/open-source/contributing).
 
-* [Requesting help](https://kusanagi.io/app#katana/open-source/help)
-* [Reporting a bug](https://kusanagi.io/app#katana/open-source/bug)
-* [Submitting a patch](https://kusanagi.io/app#katana/open-source/patch)
-* [Security issues](https://kusanagi.io/app#katana/open-source/security)
+* [Requesting help](https://app.kusanagi.io#katana/open-source/help)
+* [Reporting a bug](https://app.kusanagi.io#katana/open-source/bug)
+* [Submitting a patch](https://app.kusanagi.io#katana/open-source/patch)
+* [Security issues](https://app.kusanagi.io#katana/open-source/security)
 
-We use [milestones](https://github.com/kusanagi/katana-sdk-%LANGUAGE%/milestones) to track upcoming releases inline with our [versioning](https://kusanagi.io/app#katana/versioning) strategy, and as defined in our [roadmap](https://kusanagi.io/app#katana/roadmap).
+We use [milestones](https://github.com/kusanagi/katana-sdk-java8/milestones) to track upcoming releases inline with our [versioning](https://app.kusanagi.io#katana/docs/framework/versions) strategy, and as defined in our [roadmap](https://app.kusanagi.io#katana/docs/framework/roadmap).
 
 For commercial support see the [solutions](https://kusanagi.io/solutions) available or [contact us](https://kusanagi.io/contact) for more information.
 
 Contributing
 ------------
 
-If you'd like to know how you can help and support our Open Source efforts see the many ways to [get involved](https://kusanagi.io/app#katana/open-source/get-involved).
+If you'd like to know how you can help and support our Open Source efforts see the many ways to [get involved](https://app.kusanagi.io#katana/open-source).
 
-Please also be sure to review our [community guidelines](https://kusanagi.io/app#katana/community/conduct).
+Please also be sure to review our [community guidelines](https://app.kusanagi.io#katana/community/conduct).
 
 License
 -------
@@ -252,4 +256,4 @@ Copyright 2016-2017 KUSANAGI S.L. (https://kusanagi.io). All rights reserved.
 
 KUSANAGI, the sword logo, KATANA and the "K" logo are trademarks and/or registered trademarks of KUSANAGI S.L. All other trademarks are property of their respective owners.
 
-Licensed under the [MIT License](https://kusanagi.io/app#katana/open-source/license). Redistributions of the source code included in this repository must retain the copyright notice found in each file.
+Licensed under the [MIT License](https://app.kusanagi.io#katana/open-source/license). Redistributions of the source code included in this repository must retain the copyright notice found in each file.
