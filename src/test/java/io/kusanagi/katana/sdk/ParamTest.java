@@ -31,7 +31,7 @@ public class ParamTest {
         Assert.assertEquals(object, new Param(object));
         Assert.assertEquals(-323295288, object.hashCode());
         Assert.assertEquals(
-                "Param{name='name', value='James', type='string', exists=false}",
+                "Param{name='name', value=James, type='string', exists=false}",
                 object.toString());
     }
 

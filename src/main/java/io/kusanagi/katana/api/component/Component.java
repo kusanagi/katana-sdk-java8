@@ -86,6 +86,18 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
 
     private Map<String, Callable<T>> resources;
 
+    private ZMQ.Socket router;
+
+    private ZMQ.Context context;
+
+    private ZMQ.Socket dealer;
+
+    private OptionManager optionManager;
+
+    private boolean stopped;
+
+    private Mapping mapping;
+
     protected EventCallable<R> startupCallable;
 
     protected EventCallable<R> shutdownCallable;
@@ -94,18 +106,7 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
 
     protected List<ComponentWorker> workers;
 
-    private ZMQ.Socket router;
-
-    private ZMQ.Context context;
-
-    private Serializer serializer;
-
-    private ZMQ.Socket dealer;
-
-    private OptionManager optionManager;
-
-    private boolean stopped;
-    private Mapping mapping;
+    protected Serializer serializer;
 
     /**
      * Initialize the componentName with the command line arguments
@@ -145,89 +146,44 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
         return componentName;
     }
 
-    public void setComponent(String component) {
-        this.componentName = component;
-    }
-
     public boolean isDisableCompactName() {
         return disableCompactName;
     }
 
-    public void setDisableCompactName(boolean disableCompactName) {
-        this.disableCompactName = disableCompactName;
-    }
-
-
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getVersion() {
         return version;
     }
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
     public String getFrameworkVersion() {
         return frameworkVersion;
-    }
-
-    public void setFrameworkVersion(String frameworkVersion) {
-        this.frameworkVersion = frameworkVersion;
     }
 
     public String getSocket() {
         return socket;
     }
 
-    public void setSocket(String socket) {
-        this.socket = socket;
-    }
-
     public String getTcp() {
         return tcp;
-    }
-
-    public void setTcp(String tcp) {
-        this.tcp = tcp;
     }
 
     public Map<String, String> getVar() {
         return var;
     }
 
-    public void setVar(Map<String, String> var) {
-        this.var = var;
-    }
-
     public boolean isDebug() {
         return debug;
-    }
-
-    public void setDebug(boolean debug) {
-        this.debug = debug;
     }
 
     public String getAction() {
         return action;
     }
 
-    public void setAction(String action) {
-        this.action = action;
-    }
-
     public boolean isQuiet() {
         return quiet;
-    }
-
-    public void setQuiet(boolean quiet) {
-        this.quiet = quiet;
     }
 
     // SDK METHODS
@@ -326,8 +282,7 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
             Scanner in = new Scanner(System.in);
             String payload = in.next();
             try {
-                CommandPayload<T> command = serializer.deserialize(payload, getCommandPayloadClass(this.action));
-                S commandReply = processRequest(this.action, null, command);
+                S commandReply = processRequest(this.action, getSdkCommand(this.action, null, payload));
                 System.out.print(serializer.serializeInJson(commandReply));
             } catch (Exception e) {
                 Logger.log(e);
@@ -430,9 +385,8 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
     @Override
     public byte[][] onRequestReceived(String componentType, byte[] mappings, byte[] commandBytes) {
         try {
-            CommandPayload<T> command = serializer.deserialize(commandBytes, getCommandPayloadClass(componentType));
             Mapping mapping = deserializeMappings(mappings);
-            S commandReply = processRequest(componentType, mapping, command);
+            S commandReply = processRequest(componentType, getSdkCommand(componentType, mapping, commandBytes));
             return new byte[][]{getReplyMetadata(commandReply), serializer.serializeInBytes(commandReply)};
         } catch (Exception e) {
             Logger.log(e);
@@ -447,9 +401,12 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
         }
     }
 
+    protected abstract T getSdkCommand(String componentType, Mapping mapping, byte[] commandBytes) throws IOException;
+    protected abstract T getSdkCommand(String componentType, Mapping mapping, String jsonCommand) throws IOException;
+
     protected abstract void runErrorCallback();
 
-    public static ErrorPayload getErrorPayload(Exception e) {
+    private static ErrorPayload getErrorPayload(Exception e) {
         Error error = new Error();
         error.setMessage(e.getMessage());
         error.setCode(1);
@@ -497,30 +454,6 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
 
     /**
      * @param componentType
-     * @return
-     */
-    protected abstract Class<? extends CommandPayload> getCommandPayloadClass(String componentType);
-
-    /**
-     * @param componentType
-     * @param command
-     */
-    protected void setBaseCommandAttrs(String componentType, Mapping mapping, T command) {
-        command.setComponent(this);
-        command.setName(this.getName());
-        command.setProtocolVersion(this.getVersion());
-        command.setPlatformVersion(this.getFrameworkVersion());
-        command.setDebug(this.isDebug());
-        command.setVariables(this.getVar());
-        if (mapping != null && !mapping.getServiceSchema().isEmpty()) {
-            this.mapping = mapping;
-        }
-        command.setMapping(this.mapping);
-
-    }
-
-    /**
-     * @param componentType
      * @param response
      * @return
      */
@@ -532,13 +465,9 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
      */
     protected abstract CommandReplyResult getReply(String componentType, T response);
 
-    private S processRequest(String componentType, Mapping mapping, CommandPayload<T> commandPayload) {
-        T command = commandPayload.getCommand().getArgument();
-        setBaseCommandAttrs(componentType, mapping, command);
-
+    private S processRequest(String componentType, T command) {
         Callable<T> callable = getCallable(componentType);
         callable.run(command);
-
         return getCommandReplyPayload(componentType, command);
     }
 

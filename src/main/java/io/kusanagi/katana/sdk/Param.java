@@ -80,6 +80,10 @@ public class Param {
         this.type = type;
     }
 
+    public boolean isExists() {
+        return exists;
+    }
+
     public void setExists(boolean exists) {
         this.exists = exists;
     }
@@ -123,12 +127,7 @@ public class Param {
      * MUST update the name of the parameter with the given value of the REQUIRED name argument.
      */
     public Param copyWithName(String name) {
-        Param param = new Param();
-        param.setName(name);
-        param.setType(this.type);
-        param.setValue(this.value);
-        param.setExists(this.exists);
-        return param;
+        return new Param(name, value, type, exists);
     }
 
     /**
@@ -137,12 +136,7 @@ public class Param {
      * MUST update the value of the parameter with the given value of the REQUIRED value argument.
      */
     public Param copyWithValue(String value) {
-        Param param = new Param();
-        param.setName(this.name);
-        param.setType(this.type);
-        param.setValue(value);
-        param.setExists(this.exists);
-        return param;
+        return new Param(name, value, type, exists);
     }
 
     /**
@@ -151,12 +145,7 @@ public class Param {
      * MUST update the data type of the parameter with the given value of the REQUIRED type argument.
      */
     public Param copyWithType(String type) {
-        Param param = new Param();
-        param.setName(this.name);
-        param.setType(type);
-        param.setValue(this.value);
-        param.setExists(this.exists);
-        return param;
+        return new Param(name, value, type, exists);
     }
 
     @Override
@@ -164,31 +153,30 @@ public class Param {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Param)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         Param param = (Param) o;
 
-        if (exists() != param.exists()) {
+        if (exists != param.exists) {
             return false;
         }
-        if (getName() != null ? !getName().equals(param.getName()) : param.getName() != null) {
+        if (name != null ? !name.equals(param.name) : param.name != null) {
             return false;
         }
-        if (getValue() != null ? !getValue().equals(param.getValue()) : param.getValue() != null) {
+        if (value != null ? !value.equals(param.value) : param.value != null) {
             return false;
         }
-        return getType() != null ? getType().equals(param.getType()) : param.getType() == null;
-
+        return type != null ? type.equals(param.type) : param.type == null;
     }
 
     @Override
     public int hashCode() {
-        int result = getName() != null ? getName().hashCode() : 0;
-        result = 31 * result + (getValue() != null ? getValue().hashCode() : 0);
-        result = 31 * result + (getType() != null ? getType().hashCode() : 0);
-        result = 31 * result + (exists() ? 1 : 0);
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (value != null ? value.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (exists ? 1 : 0);
         return result;
     }
 
@@ -196,7 +184,7 @@ public class Param {
     public String toString() {
         return "Param{" +
                 "name='" + name + '\'' +
-                ", value='" + value + '\'' +
+                ", value=" + value +
                 ", type='" + type + '\'' +
                 ", exists=" + exists +
                 '}';

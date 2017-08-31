@@ -18,12 +18,13 @@ package io.kusanagi.katana.api.commands;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.commands.common.CommandPayload;
 import io.kusanagi.katana.api.component.Key;
+import io.kusanagi.katana.api.serializers.RequestEntity;
 import io.kusanagi.katana.sdk.Request;
 
 /**
  * Created by juan on 26/09/16.
  */
-public class RequestCommandPayload extends CommandPayload<Request> {
+public class RequestCommandPayload extends CommandPayload<RequestEntity> {
 
     /**
      * The semantics of the command
@@ -81,13 +82,13 @@ public class RequestCommandPayload extends CommandPayload<Request> {
                 "} " + super.toString();
     }
 
-    public static class RequestCommand extends Command<Request> {
+    public static class RequestCommand extends Command<RequestEntity> {
 
         /**
          * The key/value arguments for the command, if no arguments exist this property SHOULD NOT be defined
          */
         @JsonProperty(Key.COMMAND_ARGUMENT)
-        private Request argument;
+        private RequestEntity argument;
 
         public RequestCommand() {
             //Empty constructor for serialization
@@ -95,15 +96,15 @@ public class RequestCommandPayload extends CommandPayload<Request> {
 
         public RequestCommand(RequestCommand other) {
             super(other);
-            this.argument = new Request(other.argument);
+            this.argument = new RequestEntity(other.argument);
         }
 
         @Override
-        public Request getArgument() {
+        public RequestEntity getArgument() {
             return argument;
         }
 
-        public void setArgument(Request argument) {
+        public void setArgument(RequestEntity argument) {
             this.argument = argument;
         }
 

@@ -31,7 +31,7 @@ public class HttpRequestTest {
         Assert.assertEquals(object, new HttpRequest(object));
         Assert.assertEquals(-110193202, object.hashCode());
         Assert.assertEquals(
-                "HttpRequest{protocolVersion='1.1', method='POST', url='http://example.com/v1.0.0/users', queryParamsArray={name=[James], age=[32]}, postParamsArray={name=[Juan], age=[27]}, headers={Accept=[application/json]}, body='body', files=null}",
+                "HttpRequest{httpRequestEntity=HttpRequestEntity{protocolVersion='1.1', method='POST', url='http://example.com/v1.0.0/users', queryParamsArray={name=[James], age=[32]}, postParamsArray={name=[Juan], age=[27]}, headers={Accept=[application/json]}, body='body', files=null}}",
                 object.toString());
     }
 

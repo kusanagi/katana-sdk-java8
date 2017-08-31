@@ -23,6 +23,7 @@ import io.kusanagi.katana.api.commands.common.CommandMeta;
 import io.kusanagi.katana.api.component.Serializer;
 import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.api.component.utils.MessagePackSerializer;
+import io.kusanagi.katana.api.serializers.*;
 import io.kusanagi.katana.sdk.*;
 
 import java.io.IOException;
@@ -152,7 +153,7 @@ public class MockFactory {
     }
 
     public Action getAction() {
-        return getActionCommand().getArgument();
+        return new Action.Builder().setActionEntity(getActionCommand().getArgument()).build();
     }
 
     public Call getCall() {
@@ -172,7 +173,7 @@ public class MockFactory {
     }
 
     public Request getRequest() {
-        return getRequestCommand().getArgument();
+        return new Request.Builder().setRequestEntity(getRequestCommand().getArgument()).build();
     }
 
     public HttpResponse getHttpResponse() {
@@ -180,7 +181,7 @@ public class MockFactory {
     }
 
     public Response getResponse() {
-        return getResponseCommand().getArgument();
+        return new Response.Builder().setResponseEntity(getResponseCommand().getArgument()).build();
     }
 
     public Param getParam() {

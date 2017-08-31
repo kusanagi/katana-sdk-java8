@@ -18,9 +18,15 @@ package io.kusanagi.katana.sdk;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.Api;
+import io.kusanagi.katana.api.commands.Mapping;
 import io.kusanagi.katana.api.component.Component;
 import io.kusanagi.katana.api.component.Constants;
 import io.kusanagi.katana.api.component.Key;
+import io.kusanagi.katana.api.replies.common.CommandReplyResult;
+import io.kusanagi.katana.api.serializers.ActionEntity;
+import io.kusanagi.katana.api.serializers.HttpResponseEntity;
+import io.kusanagi.katana.api.serializers.RequestEntity;
+import io.kusanagi.katana.api.serializers.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,77 +36,57 @@ import java.util.Map;
  * Created by juan on 27/08/16.
  */
 public class Request extends Api {
-    /**
-     * The meta-information about the payload
-     */
-    @JsonProperty(Key.REQUEST_META)
-    private Meta meta;
 
-    /**
-     * The semantics of the request
-     */
-    @JsonProperty(Key.REQUEST_HTTP_REQUEST)
+    private RequestEntity requestEntity;
+
     private HttpRequest httpRequest;
-
-    /**
-     * The semantics of the Service to contact
-     */
-    @JsonProperty(Key.REQUEST_REQUEST_CALL)
-    private RequestCall requestCall;
 
     public Request() {
         // Default constructor to make possible the serialization of this object.
     }
 
-    /**
-     * @param path
-     * @param name
-     * @param version
-     * @param platformVersion
-     * @param variables
-     * @param isDebug
-     */
-    public Request(Component component, String path, String name, String version, String platformVersion, Map<String, String> variables, boolean isDebug) {
-        super(component, path, name, version, platformVersion, variables, isDebug);
+    public Request(Component component, String path, String name, String version, String platformVersion,
+                   Map<String, String> variables, boolean isDebug, Mapping mapping, RequestEntity requestEntity, HttpRequest httpRequest) {
+        super(component, path, name, version, platformVersion, variables, isDebug, mapping);
+        this.requestEntity = requestEntity;
+        this.httpRequest = httpRequest;
     }
 
     public Request(Request other) {
         super(other);
-        this.meta = other.meta;
+        this.requestEntity = other.requestEntity;
         this.httpRequest = other.httpRequest;
-        this.requestCall = other.requestCall;
-    }
-
-    public Meta getMeta() {
-        return this.meta;
-    }
-
-    public void setMeta(Meta meta) {
-        this.meta = meta;
-    }
-
-    public void setHttpRequest(HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
     }
 
     public RequestCall getRequestCall() {
-        return this.requestCall;
-    }
-
-    public void setRequestCall(RequestCall requestCall) {
-        this.requestCall = requestCall;
+        return requestEntity.getRequestCall();
     }
 
     // SDK Methods
+
+    /**
+     *
+     * @return
+     */
+    public String getId() { //TODO
+        return "";
+    }
+
+    /**
+     *
+     * @return
+     */
+    public long getTimeStamp(){ //TODO
+        return 0;
+    }
 
     /**
      * return the protocol implemented by the Gateway component handling the request.
      *
      * @return the protocol.
      */
-    @JsonIgnore
     public String getGatewayProtocol() {
-        return this.meta.getProtocol();
+        return requestEntity.getMeta().getProtocol();
     }
 
     /**
@@ -108,9 +94,8 @@ public class Request extends Api {
      *
      * @return the public address
      */
-    @JsonIgnore
     public String getGatewayAddress() {
-        return this.meta.getGateway().get(1);
+        return requestEntity.getMeta().getGateway().get(1);
     }
 
     /**
@@ -118,17 +103,15 @@ public class Request extends Api {
      *
      * @return the IP address
      */
-    @JsonIgnore
     public String getClientAddress() {
-        return this.meta.getClient();
+        return requestEntity.getMeta().getClient();
     }
 
     /**
      * @return the name currently defined for the Service, or an empty string if not defined.
      */
-    @JsonIgnore
     public String getServiceName() {
-        return this.requestCall.getService();
+        return requestEntity.getRequestCall().getService();
     }
 
     /**
@@ -138,16 +121,15 @@ public class Request extends Api {
      * @return Return true if the operation was successful
      */
     public Request setServiceName(String name) {
-        this.requestCall.setService(name);
+        requestEntity.getRequestCall().setService(name);
         return this;
     }
 
     /**
      * @return Return the version currently defined for the Service, or an empty string if not defined.
      */
-    @JsonIgnore
     public String getServiceVersion() {
-        return this.requestCall.getVersion();
+        return requestEntity.getRequestCall().getVersion();
     }
 
     /**
@@ -157,16 +139,15 @@ public class Request extends Api {
      * @return Return true if the operation was successful
      */
     public Request setServiceVersion(String version) {
-        this.requestCall.setVersion(version);
+        requestEntity.getRequestCall().setVersion(version);
         return this;
     }
 
     /**
      * @return Return the name currently defined for the Service action, or an empty string if not defined.
      */
-    @JsonIgnore
     public String getActionName() {
-        return this.requestCall.getAction();
+        return requestEntity.getRequestCall().getAction();
     }
 
     /**
@@ -176,7 +157,7 @@ public class Request extends Api {
      * @return Return true if the operation was successful
      */
     public Request setActionName(String action) {
-        this.requestCall.setAction(action);
+        requestEntity.getRequestCall().setAction(action);
         return this;
     }
 
@@ -187,10 +168,10 @@ public class Request extends Api {
      * @return true if the param has been defined
      */
     public boolean hasParam(String name) {
-        if (this.requestCall.getParams() == null) {
+        if (requestEntity.getRequestCall().getParams() == null) {
             return false;
         }
-        for (Param param : this.requestCall.getParams()) {
+        for (Param param : requestEntity.getRequestCall().getParams()) {
             if (param.getName().equals(name)) {
                 return true;
             }
@@ -207,16 +188,16 @@ public class Request extends Api {
      * @param name param name
      * @return the param with the name argument
      */
-    @JsonIgnore
     public Param getParam(String name) {
-        if (this.requestCall.getParams() == null) {
-            this.requestCall.setParams(new ArrayList<>());
+        if (requestEntity.getRequestCall().getParams() == null) {
+            requestEntity.getRequestCall().setParams(new ArrayList<>());
         }
-        for (Param param : this.requestCall.getParams()) {
+        for (Param param : requestEntity.getRequestCall().getParams()) {
             if (param.getName().equals(name)) {
                 return param;
             }
         }
+
         Param param = new Param();
         param.setName(name);
         param.setExists(false);
@@ -227,12 +208,11 @@ public class Request extends Api {
      * @return all the parameters and which MUST be returned as an array of Param objects. If no parameters are found an
      * empty array MUST be returned.
      */
-    @JsonIgnore
     public List<Param> getParams() {
-        if (this.requestCall.getParams() == null) {
+        if (requestEntity.getRequestCall().getParams() == null) {
             return new ArrayList<>();
         } else {
-            return this.requestCall.getParams();
+            return requestEntity.getRequestCall().getParams();
         }
     }
 
@@ -243,10 +223,10 @@ public class Request extends Api {
      * @return the instance of the request
      */
     public Request setParam(Param param) {
-        if (this.requestCall == null) {
-            this.requestCall.setParams(new ArrayList<>());
+        if (requestEntity.getRequestCall() == null) {
+            requestEntity.getRequestCall().setParams(new ArrayList<>());
         }
-        this.requestCall.getParams().add(param);
+        requestEntity.getRequestCall().getParams().add(param);
         return this;
     }
 
@@ -271,21 +251,28 @@ public class Request extends Api {
     }
 
     /**
-     * @param code Response code
-     * @param text Response text
-     * @return Return a new instance of the Response class, setting the HTTP status code with the value specified by the
+     * @param code ResponseEntity code
+     * @param text ResponseEntity text
+     * @return Return a new instance of the ResponseEntity class, setting the HTTP status code with the value specified by the
      * REQUIRED code argument and the status text with the REQUIRED text argument.
      */
     public Response newResponse(int code, String text) {
-        HttpResponse httpResponse = new HttpResponse();
+        HttpResponse httpResponse = new HttpResponse.Builder().setHttpResponseEntity(new HttpResponseEntity()).build();
         if (getGatewayProtocol().equals(Constants.KATANA_PROTOCOL_HTTP)) {
             httpResponse.setStatus(code, text);
         }
 
-        Response response = new Response(this.component, this.path, this.name, this.version, this.platformVersion, this.variables, this.isDebug);
-        response.setTransport(new Transport());
-        response.setHttpResponse(httpResponse);
-        return response;
+        return new Response.Builder()
+                .setResponseEntity(new ResponseEntity())
+                .setComponent(this.component)
+                .setPath(this.path)
+                .setName(this.name)
+                .setVersion(this.version)
+                .setPlatformVersion(this.platformVersion)
+                .setVariables(this.variables)
+                .setDebug(this.isDebug)
+                .setMapping(this.mapping)
+                .build();
     }
 
     /**
@@ -296,12 +283,42 @@ public class Request extends Api {
         return this.httpRequest;
     }
 
+    public static class Builder extends Api.Builder<Request>{
+
+        private RequestEntity requestEntity;
+        private HttpRequest httpRequest;
+
+        public Builder() {
+        }
+
+        public Request.Builder setRequestEntity(RequestEntity requestEntity) {
+            this.requestEntity = requestEntity;
+            this.httpRequest = new HttpRequest.Builder().setHttpRequestEntity(requestEntity.getHttpRequest()).build();
+            return this;
+        }
+
+        public Request build(){
+            return new Request(
+                    getComponent(),
+                    getPath(),
+                    getName(),
+                    getVersion(),
+                    getPlatformVersion(),
+                    getVariables(),
+                    isDebug(),
+                    getMapping(),
+                    requestEntity,
+                    httpRequest
+            );
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Request)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {
@@ -310,31 +327,25 @@ public class Request extends Api {
 
         Request request = (Request) o;
 
-        if (getMeta() != null ? !getMeta().equals(request.getMeta()) : request.getMeta() != null) {
+        if (requestEntity != null ? !requestEntity.equals(request.requestEntity) : request.requestEntity != null) {
             return false;
         }
-        if (getHttpRequest() != null ? !getHttpRequest().equals(request.getHttpRequest()) : request.getHttpRequest() != null) {
-            return false;
-        }
-        return getRequestCall() != null ? getRequestCall().equals(request.getRequestCall()) : request.getRequestCall() == null;
-
+        return httpRequest != null ? httpRequest.equals(request.httpRequest) : request.httpRequest == null;
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (getMeta() != null ? getMeta().hashCode() : 0);
-        result = 31 * result + (getHttpRequest() != null ? getHttpRequest().hashCode() : 0);
-        result = 31 * result + (getRequestCall() != null ? getRequestCall().hashCode() : 0);
+        result = 31 * result + (requestEntity != null ? requestEntity.hashCode() : 0);
+        result = 31 * result + (httpRequest != null ? httpRequest.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "Request{" +
-                "meta=" + meta +
+                "requestEntity=" + requestEntity +
                 ", httpRequest=" + httpRequest +
-                ", requestCall=" + requestCall +
-                "} " + super.toString();
+                '}';
     }
 }

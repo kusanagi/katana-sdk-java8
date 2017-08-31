@@ -16,10 +16,8 @@
 package io.kusanagi.katana.sdk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
+import io.kusanagi.katana.api.serializers.TransportEntity;
 
 import java.lang.*;
 import java.util.ArrayList;
@@ -31,249 +29,57 @@ import java.util.Map;
  * Created by juan on 14/09/16.
  */
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Transport implements CommandReplyResult {
 
-    /**
-     * The meta-information about the Transport
-     */
-    @JsonProperty(Key.TRANSPORT_META)
-    private TransportMeta meta;
+    private TransportEntity transportEntity;
 
-    /**
-     * An object containing the semantics of the file to download in the response from the Gateway to the client, if no
-     * file is set this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.TRANSPORT_BODY)
-    private File body;
-
-    /**
-     * An object containing the semantics of the files uploaded to the Gateway or sent by a Service, if no files are set
-     * this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.TRANSPORT_FILES)
-    private Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> files;
-
-    /**
-     * The data stored by each Service for the response, if no data exists this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.TRANSPORT_DATA)
-    private Map<String, Map<String, Map<String, Map<String, Object>>>> data;
-
-    /**
-     * The relationships defined by each Service with others, if no relations exist this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.TRANSPORT_RELATIONS)
-    private Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations;
-
-    /**
-     * The hyperlinks defined by each Service for the response, where each property is the name of the link, while the
-     * value is the URI [17] itself, if no links exist this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.TRANSPORT_LINKS)
-    private Map<String, Map<String, Map<String, String>>> links;
-
-    /**
-     * The calls to other Services within this request, if no calls exist this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.TRANSPORT_CALLS)
-    private Map<String, Map<String, List<Call>>> calls;
-
-    /**
-     * The transactions registered by each Service, if no transactions exist this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.TRANSPORT_TRANSACTIONS)
-    private Transaction transactions;
-
-    /**
-     * The errors returned by each Service, if no errors exist this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.TRANSPORT_ERRORS)
-    private Map<String, Map<String, Map<String, List<Error>>>> errors;
-
-    /**
-     *
-     */
     public Transport() {
-        this.links = new HashMap<>();
+    }
+
+    public Transport(TransportEntity transportEntity) {
+        this.transportEntity = transportEntity;
     }
 
     public Transport(Transport other) {
-        this.meta = other.meta;
-        this.body = other.body;
-        this.files = other.files;
-        this.data = other.data;
-        this.relations = other.relations;
-        this.links = other.links;
-        this.calls = other.calls;
-        this.transactions = other.transactions;
-        this.errors = other.errors;
+        this.transportEntity = other.transportEntity;
     }
 
-    /**
-     * Transport meta getter
-     *
-     * @return Return the transport meta
-     */
     public TransportMeta getMeta() {
-        return meta;
+        return transportEntity.getMeta();
     }
 
-    /**
-     * Transport meta setter
-     *
-     * @param meta Transport meta object
-     */
-    public void setMeta(TransportMeta meta) {
-        this.meta = meta;
-    }
-
-    /**
-     * File getter
-     *
-     * @return Return the file
-     */
     public File getBody() {
-        return body;
+        return transportEntity.getBody();
     }
 
-    /**
-     * File body setter
-     *
-     * @param body File object
-     */
-    public void setBody(File body) {
-        this.body = body;
+    public Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> getFilesEntity() {
+        return transportEntity.getFiles();
     }
 
-    /**
-     * File list getter
-     *
-     * @return Return the list of files
-     */
-    public Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> getFiles() {
-        return files;
-    }
-
-    /**
-     * File list setter
-     *
-     * @param files File list
-     */
-    public void setFiles(Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> files) {
-        this.files = files;
-    }
-
-    /**
-     * Data getter
-     *
-     * @return Return data object
-     */
     public Map<String, Map<String, Map<String, Map<String, Object>>>> getData() {
-        return data;
+        return transportEntity.getData();
     }
 
-    /**
-     * Data setter
-     *
-     * @param data Data object
-     */
-    public void setData(Map<String, Map<String, Map<String, Map<String, Object>>>> data) {
-        this.data = data;
-    }
-
-    /**
-     * Relations getter
-     *
-     * @return Return the list of the relations
-     */
     public Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> getRelations() {
-        return relations;
+        return transportEntity.getRelations();
     }
 
-    /**
-     * Relations setter
-     *
-     * @param relations Relation list
-     */
-    public void setRelations(Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations) {
-        this.relations = relations;
-    }
-
-    /**
-     * Links getter
-     *
-     * @return Return the links
-     */
     public Map<String, Map<String, Map<String, String>>> getLinks() {
-        return links;
+        return transportEntity.getLinks();
     }
 
-    /**
-     * Links setter
-     *
-     * @param links Links to set
-     */
-    public void setLinks(Map<String, Map<String, Map<String, String>>> links) {
-        this.links = links;
-    }
-
-    /**
-     * Calls getter
-     *
-     * @return Return the call
-     */
     public Map<String, Map<String, List<Call>>> getCalls() {
-        return calls;
+        return transportEntity.getCalls();
     }
 
-    /**
-     * Calls setter
-     *
-     * @param calls RequestCall list
-     */
-    public void setCalls(Map<String, Map<String, List<Call>>> calls) {
-        this.calls = calls;
-    }
-
-    /**
-     * Transaction getter
-     *
-     * @return Return the transactions
-     */
     public Transaction getTransactions() {
-        return transactions;
+        return transportEntity.getTransactions();
     }
 
-    /**
-     * Transaction setter
-     *
-     * @param transactions Transaction list
-     */
-    public void setTransactions(Transaction transactions) {
-        this.transactions = transactions;
-    }
-
-    /**
-     * Errors getter
-     *
-     * @return Return the error list
-     */
     public Map<String, Map<String, Map<String, List<Error>>>> getErrors() {
-        if (this.errors == null) {
-            this.errors = new HashMap<>();
-        }
-        return errors;
+        return transportEntity.getErrors();
     }
 
-    /**
-     * Error setter
-     *
-     * @param errors Error list
-     */
-    public void setErrors(Map<String, Map<String, Map<String, List<Error>>>> errors) {
-        this.errors = errors;
-    }
 
     // SDK Methods
 
@@ -282,7 +88,7 @@ public class Transport implements CommandReplyResult {
      */
     @JsonIgnore
     public String getRequestId() {
-        return this.meta.getId();
+        return transportEntity.getMeta().getId();
     }
 
     /**
@@ -290,7 +96,7 @@ public class Transport implements CommandReplyResult {
      */
     @JsonIgnore
     public String getRequestTimeStamp() {
-        return this.meta.getDatetime();
+        return transportEntity.getMeta().getDatetime();
     }
 
     /**
@@ -299,7 +105,7 @@ public class Transport implements CommandReplyResult {
      */
     @JsonIgnore
     public String[] getOriginService() {
-        return this.meta.getOrigin();
+        return transportEntity.getMeta().getOrigin();
     }
 
     /**
@@ -309,7 +115,7 @@ public class Transport implements CommandReplyResult {
      */
     @JsonIgnore
     public int getOriginDuration(){
-        return this.meta.getDuration();
+        return transportEntity.getMeta().getDuration();
     }
 
     /**
@@ -326,13 +132,13 @@ public class Transport implements CommandReplyResult {
      */
     @JsonIgnore
     public String getProperty(String name, String defaultString) {
-        String property = this.meta.getProperties().get(name);
+        String property = transportEntity.getMeta().getProperties().get(name);
         return property == null ? defaultString == null ? "" : defaultString : property;
     }
 
     @JsonIgnore
     public Map<String, String> getProperties() {
-        return this.meta.getProperties();
+        return transportEntity.getMeta().getProperties();
     }
 
     /**
@@ -341,7 +147,7 @@ public class Transport implements CommandReplyResult {
      * @return Return true if a download file has been registered
      */
     public boolean hasDownload() {
-        return this.body != null;
+        return transportEntity.getBody() != null;
     }
 
     /**
@@ -349,7 +155,7 @@ public class Transport implements CommandReplyResult {
      */
     @JsonIgnore
     public File getDownload() {
-        return this.body;
+        return transportEntity.getBody();
     }
 
     /**
@@ -369,15 +175,15 @@ public class Transport implements CommandReplyResult {
             if (service != null) {
                 if (version != null) {
                     if (action != null) {
-                        return this.data.get(address).get(service).get(version).get(action);
+                        return transportEntity.getData().get(address).get(service).get(version).get(action);
                     }
-                    return this.data.get(address).get(service).get(version);
+                    return transportEntity.getData().get(address).get(service).get(version);
                 }
-                return this.data.get(address).get(service);
+                return transportEntity.getData().get(address).get(service);
             }
-            return this.data.get(address);
+            return transportEntity.getData().get(address);
         }
-        return this.data;
+        return transportEntity.getData();
     }
 
     /**
@@ -390,11 +196,11 @@ public class Transport implements CommandReplyResult {
     public Object getRelations(String address, String service) {
         if (address != null) {
             if (service != null) {
-                return this.relations.get(address).get(service);
+                return transportEntity.getRelations().get(address).get(service);
             }
-            return this.relations.get(address);
+            return transportEntity.getRelations().get(address);
         }
-        return this.relations;
+        return transportEntity.getRelations();
     }
 
     /**
@@ -407,11 +213,11 @@ public class Transport implements CommandReplyResult {
     public Object getLinks(String address, String service) {
         if (address != null) {
             if (service != null) {
-                return this.links.get(address).get(service);
+                return transportEntity.getLinks().get(address).get(service);
             }
-            return this.links.get(address);
+            return transportEntity.getLinks().get(address);
         }
-        return this.links;
+        return transportEntity.getLinks();
     }
 
     /**
@@ -423,9 +229,9 @@ public class Transport implements CommandReplyResult {
      */
     public Object getCalls(String service) {
         if (service != null) {
-            return this.calls.get(service);
+            return transportEntity.getCalls().get(service);
         }
-        return this.calls;
+        return transportEntity.getCalls();
     }
 
     /**
@@ -442,19 +248,19 @@ public class Transport implements CommandReplyResult {
         transaction.setRollback(new ArrayList<>());
         transaction.setComplete(new ArrayList<>());
 
-        for (ServiceTransaction serviceTransaction : this.transactions.getCommit()) {
+        for (ServiceTransaction serviceTransaction : transportEntity.getTransactions().getCommit()) {
             if (serviceTransaction.getName().equals(service)) {
                 transaction.getCommit().add(serviceTransaction);
             }
         }
 
-        for (ServiceTransaction serviceTransaction : this.transactions.getRollback()) {
+        for (ServiceTransaction serviceTransaction : transportEntity.getTransactions().getRollback()) {
             if (serviceTransaction.getName().equals(service)) {
                 transaction.getRollback().add(serviceTransaction);
             }
         }
 
-        for (ServiceTransaction serviceTransaction : this.transactions.getComplete()) {
+        for (ServiceTransaction serviceTransaction : transportEntity.getTransactions().getComplete()) {
             if (serviceTransaction.getName().equals(service)) {
                 transaction.getComplete().add(serviceTransaction);
             }
@@ -473,15 +279,15 @@ public class Transport implements CommandReplyResult {
     public Object getErrors(String address, String service) {
         if (address != null) {
             if (service != null) {
-                return this.errors.get(address).get(service);
+                return transportEntity.getErrors().get(address).get(service);
             }
-            return this.errors.get(address);
+            return transportEntity.getErrors().get(address);
         }
-        return this.errors;
+        return transportEntity.getErrors();
     }
 
     public void addFile(String path, String service, String version, String action, File file) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFile = this.getFiles();
+        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFile = transportEntity.getFiles();
         Map<String, Map<String, Map<String, Map<String, File>>>> serviceFile = new HashMap<>();
         Map<String, Map<String, Map<String, File>>> versionFile = new HashMap<>();
         Map<String, Map<String, File>> actionFile = new HashMap<>();
@@ -517,71 +323,47 @@ public class Transport implements CommandReplyResult {
         nameFile.put(file.getName(), file);
     }
 
+    public static class Builder{
+
+        private TransportEntity transportEntity;
+
+        public Builder() {
+            this.transportEntity = new TransportEntity();
+        }
+
+        public Transport.Builder setTransportEntity(TransportEntity transportEntity) {
+            this.transportEntity = transportEntity;
+            return this;
+        }
+
+        public Transport build(){
+            return new Transport(transportEntity);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Transport)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         Transport transport = (Transport) o;
 
-        if (getMeta() != null ? !getMeta().equals(transport.getMeta()) : transport.getMeta() != null) {
-            return false;
-        }
-        if (getBody() != null ? !getBody().equals(transport.getBody()) : transport.getBody() != null) {
-            return false;
-        }
-        if (getFiles() != null ? !getFiles().equals(transport.getFiles()) : transport.getFiles() != null) {
-            return false;
-        }
-        if (getData() != null ? !getData().equals(transport.getData()) : transport.getData() != null) {
-            return false;
-        }
-        if (getRelations() != null ? !getRelations().equals(transport.getRelations()) : transport.getRelations() != null) {
-            return false;
-        }
-        if (getLinks() != null ? !getLinks().equals(transport.getLinks()) : transport.getLinks() != null) {
-            return false;
-        }
-        if (getCalls() != null ? !getCalls().equals(transport.getCalls()) : transport.getCalls() != null) {
-            return false;
-        }
-        if (getTransactions() != null ? !getTransactions().equals(transport.getTransactions()) : transport.getTransactions() != null) {
-            return false;
-        }
-        return getErrors() != null ? getErrors().equals(transport.getErrors()) : transport.getErrors() == null;
-
+        return transportEntity != null ? transportEntity.equals(transport.transportEntity) : transport.transportEntity == null;
     }
 
     @Override
     public int hashCode() {
-        int result = getMeta() != null ? getMeta().hashCode() : 0;
-        result = 31 * result + (getBody() != null ? getBody().hashCode() : 0);
-        result = 31 * result + (getFiles() != null ? getFiles().hashCode() : 0);
-        result = 31 * result + (getData() != null ? getData().hashCode() : 0);
-        result = 31 * result + (getRelations() != null ? getRelations().hashCode() : 0);
-        result = 31 * result + (getLinks() != null ? getLinks().hashCode() : 0);
-        result = 31 * result + (getCalls() != null ? getCalls().hashCode() : 0);
-        result = 31 * result + (getTransactions() != null ? getTransactions().hashCode() : 0);
-        result = 31 * result + (getErrors() != null ? getErrors().hashCode() : 0);
-        return result;
+        return transportEntity != null ? transportEntity.hashCode() : 0;
     }
 
     @Override
     public String toString() {
         return "Transport{" +
-                "meta=" + meta +
-                ", body=" + body +
-                ", files=" + files +
-                ", data=" + data +
-                ", relations=" + relations +
-                ", links=" + links +
-                ", calls=" + calls +
-                ", transactions=" + transactions +
-                ", errors=" + errors +
+                "transportEntity=" + transportEntity +
                 '}';
     }
 }

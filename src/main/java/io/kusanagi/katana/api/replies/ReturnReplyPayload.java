@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
+import io.kusanagi.katana.api.serializers.TransportEntity;
 import io.kusanagi.katana.sdk.Transport;
 
 /**
@@ -147,16 +148,16 @@ public class ReturnReplyPayload implements CommandReplyResult {
     public static class ReturnResult {
 
         @JsonProperty(Key.RETURN_RESULT_TRANSPORT)
-        private Transport transport;
+        private TransportEntity transport;
 
         @JsonProperty(Key.RETURN_RESULT_RETURN_OBJECT)
         private Object returnObject;
 
-        public Transport getTransport() {
+        public TransportEntity getTransport() {
             return transport;
         }
 
-        public void setTransport(Transport transport) {
+        public void setTransport(TransportEntity transport) {
             this.transport = transport;
         }
 

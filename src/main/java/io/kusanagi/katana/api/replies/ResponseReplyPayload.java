@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
+import io.kusanagi.katana.api.serializers.HttpResponseEntity;
 import io.kusanagi.katana.sdk.HttpResponse;
 
 /**
@@ -148,14 +149,14 @@ public class ResponseReplyPayload implements CommandReplyResult {
     public static class ResponseResult {
 
         @JsonProperty(Key.RESPONSE_RESULT_HTTP_RESPONSE)
-        private HttpResponse httpResponse;
+        private HttpResponseEntity httpResponse;
 
         @JsonIgnore
-        public HttpResponse getHttpResponse() {
+        public HttpResponseEntity getHttpResponse() {
             return httpResponse;
         }
 
-        public void setHttpResponse(HttpResponse httpResponse) {
+        public void setHttpResponse(HttpResponseEntity httpResponse) {
             this.httpResponse = httpResponse;
         }
 

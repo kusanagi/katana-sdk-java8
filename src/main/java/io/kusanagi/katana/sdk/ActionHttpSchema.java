@@ -37,7 +37,6 @@ public class ActionHttpSchema {
      * property, and which MAY containing parameters using "{" and "}" around a parameter name, defaults to "/"
      */
     @JsonProperty(Key.ACTION_HTTP_SCHEMA_PATH)
-
     private String path;
     /**
      * Defines the HTTP method expected for the request to the Gateway, allowed methods are "get", "put", "post",
