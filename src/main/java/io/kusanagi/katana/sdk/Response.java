@@ -16,12 +16,9 @@
 package io.kusanagi.katana.sdk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.Api;
 import io.kusanagi.katana.api.commands.Mapping;
 import io.kusanagi.katana.api.component.Component;
-import io.kusanagi.katana.api.component.Key;
-import io.kusanagi.katana.api.serializers.ActionEntity;
 import io.kusanagi.katana.api.serializers.ResponseEntity;
 
 import java.util.Map;
@@ -77,6 +74,33 @@ public class Response extends Api {
     @JsonIgnore
     public String getGatewayAddress() {
         return responseEntity.getMeta().getGateway().get(1);
+    }
+
+    /**
+     * get a request attribute with the REQUIRED case sensitive name argument.
+     The default argument is the OPTIONAL value to use if the request attribute does not exist. If the request attribute
+     is defined, but does not have a value, the value of the default argument SHOULD NOT be applied.
+     If a request attribute with the specified name does not exist, and no default is provided, an empty string MUST be returned.
+     * @param name attribute name
+     * @param defaultValue default value
+     * @return attribute value
+     */
+    public String getRequestAttribute(String name, String defaultValue){
+        String attr = responseEntity.getMeta().getAttributes().get(name);
+        return attr == null ? defaultValue : attr;
+    }
+
+    public String getRequestAttribute(String name){
+        return getRequestAttribute(name, "");
+    }
+
+    /**
+     *
+     * @return return an object with the request attributes, where each property is a request attribute name, and its
+     * value the attribute's value.
+     */
+    public Map<String, String> getRequestAttributes(){
+        return responseEntity.getMeta().getAttributes();
     }
 
     /**

@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
 import io.kusanagi.katana.api.serializers.TransportEntity;
-import io.kusanagi.katana.sdk.Transport;
 
 /**
  * Created by juan on 30/09/16.

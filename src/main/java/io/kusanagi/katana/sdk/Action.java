@@ -20,7 +20,10 @@ import io.kusanagi.katana.api.Api;
 import io.kusanagi.katana.api.commands.CallCommandPayload;
 import io.kusanagi.katana.api.commands.Mapping;
 import io.kusanagi.katana.api.commands.common.CommandMeta;
-import io.kusanagi.katana.api.component.*;
+import io.kusanagi.katana.api.component.Component;
+import io.kusanagi.katana.api.component.Constants;
+import io.kusanagi.katana.api.component.ExceptionMessage;
+import io.kusanagi.katana.api.component.Serializer;
 import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.api.component.utils.MessagePackSerializer;
 import io.kusanagi.katana.api.replies.ErrorPayload;
@@ -171,6 +174,10 @@ public class Action extends Api {
         return param;
     }
 
+    public Param newParam(String name) {
+        return newParam(name, "", "");
+    }
+
     /**
      * Determine if a file with the parameter name specified by the REQUIRED case sensitive
      * name argument was provided for the action.
@@ -273,6 +280,9 @@ public class Action extends Api {
         file.setPath(path);
         file.setMime(mime);
         return file;
+    }
+    public File newFile(String name, String path) {
+        return newFile(name, path, "");
     }
 
     /**
@@ -870,7 +880,7 @@ public class Action extends Api {
      * @param timeout time to wait for the response
      * @return Return the instance of the action
      */
-    public Action callRemote(String address, String service, String version, String action, List<Param> params, List<File> files, int timeout) {
+    public Action remoteCall(String address, String service, String version, String action, List<Param> params, List<File> files, int timeout) {
         ServiceSchema serviceSchema = getServiceSchema(this.name, this.version);
 
         if (mapping != null && !serviceSchema.getActionSchema(actionEntity.getActionName()).hasRemoteCalls()) {

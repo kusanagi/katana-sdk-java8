@@ -25,7 +25,6 @@ import io.kusanagi.katana.api.component.Constants;
 import io.kusanagi.katana.api.replies.CallReplyPayload;
 import io.kusanagi.katana.api.replies.ResponseReplyPayload;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
-import io.kusanagi.katana.api.serializers.ActionEntity;
 import io.kusanagi.katana.api.serializers.HttpResponseEntity;
 import io.kusanagi.katana.api.serializers.RequestEntity;
 import io.kusanagi.katana.api.serializers.ResponseEntity;
@@ -164,7 +163,7 @@ public class Middleware extends Component<Api, CommandReplyResult, Middleware> {
             HttpResponse httpResponse = (HttpResponse) getReply(componentType, response);
 
             HttpResponseEntity httpResponseEntity = new HttpResponseEntity();
-            httpResponseEntity.setHeaders(httpResponse.getHeaders());
+            httpResponseEntity.setHeaders(httpResponse.getHeadersArray());
             httpResponseEntity.setStatus(httpResponse.getStatus());
             httpResponseEntity.setProtocolVersion(httpResponse.getProtocolVersion());
             httpResponseEntity.setBody(httpResponse.getBody());

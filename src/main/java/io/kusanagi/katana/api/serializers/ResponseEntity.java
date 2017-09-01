@@ -16,7 +16,6 @@
 package io.kusanagi.katana.api.serializers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.kusanagi.katana.api.Api;
 import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.sdk.Meta;
 

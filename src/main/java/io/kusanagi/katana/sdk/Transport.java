@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
 import io.kusanagi.katana.api.serializers.TransportEntity;
 
-import java.lang.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -137,6 +136,11 @@ public class Transport implements CommandReplyResult {
     }
 
     @JsonIgnore
+    public String getProperty(String name) {
+        return getProperty(name, "");
+    }
+
+    @JsonIgnore
     public Map<String, String> getProperties() {
         return transportEntity.getMeta().getProperties();
     }
@@ -185,6 +189,15 @@ public class Transport implements CommandReplyResult {
         }
         return transportEntity.getData();
     }
+    public Object getData(String address, String service, String version) {
+        return getData(address, service, version, null);
+    }
+    public Object getData(String address, String service) {
+        return getData(address, service, null, null);
+    }
+    public Object getData(String address) {
+        return getData(address, null, null, null);
+    }
 
     /**
      * Return all of the relations as an object, as they are stored in the Transport. If the OPTIONAL case sensitive
@@ -202,6 +215,9 @@ public class Transport implements CommandReplyResult {
         }
         return transportEntity.getRelations();
     }
+    public Object getRelations(String address) {
+        return getRelations(address, null);
+    }
 
     /**
      * Return all of the links as an object, as they are stored in the Transport. If the OPTIONAL case sensitive
@@ -218,6 +234,9 @@ public class Transport implements CommandReplyResult {
             return transportEntity.getLinks().get(address);
         }
         return transportEntity.getLinks();
+    }
+    public Object getLinks(String address) {
+        return getLinks(address, null);
     }
 
     /**
@@ -284,6 +303,9 @@ public class Transport implements CommandReplyResult {
             return transportEntity.getErrors().get(address);
         }
         return transportEntity.getErrors();
+    }
+    public Object getErrors(String address) {
+        return getErrors(address, null);
     }
 
     public void addFile(String path, String service, String version, String action, File file) {

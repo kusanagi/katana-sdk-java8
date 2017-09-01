@@ -18,7 +18,10 @@ package io.kusanagi.katana.sdk;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Key;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by juan on 14/09/16.
@@ -70,8 +73,16 @@ public class Meta {
     @JsonProperty(Key.META_CLIENT)
     private String client;
 
+    /**
+     * The attributes of the request (object)
+     */
+    @JsonProperty(Key.META_ATTRS)
+    private Map<String, String> attributes;
+
     public Meta() {
         // Default constructor to make possible the serialization of this object.
+        this.gateway = new ArrayList<>();
+        this.attributes = new HashMap<>();
     }
 
     public Meta(Meta other) {
@@ -82,6 +93,7 @@ public class Meta {
         this.protocol = other.protocol;
         this.gateway = other.gateway;
         this.client = other.client;
+        this.attributes = other.attributes;
     }
 
     /**
@@ -162,6 +174,14 @@ public class Meta {
 
     public void setClient(String client) {
         this.client = client;
+    }
+
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
+        this.attributes = attributes;
     }
 
     @Override

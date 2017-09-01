@@ -38,7 +38,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -352,7 +351,7 @@ public class ComponentTest {
 
         assertEquals(responseCommandPayload, responseCommandPayloads[0]);
         assertEquals(mapping, mappings[0]);
-//        Assert.assertEquals(responseCommandPayload.getCommand().getArgument().getHttpResponse(), responseReplyPayloads[0].getCommandReply().getResult().getHttpResponse());
+        Assert.assertEquals(responses[0].getHttpResponse(), new HttpResponse.Builder().setHttpResponseEntity(responseReplyPayloads[0].getCommandReply().getResult().getHttpResponse()).build());
 
         Response response = responses[0];
         assertResponse(response);
@@ -429,7 +428,7 @@ public class ComponentTest {
             object.rollback("create", params);
             object.complete("create", params);
 //            object.deferCall("posts", "0.1.0", "read", params, null);
-//            object.callRemote("http://192.168.55.10", "posts", "0.1.0", "read", params, null, 1000);
+//            object.remoteCall("http://192.168.55.10", "posts", "0.1.0", "read", params, null, 1000);
             object.error("Unauthorized", 401, "401 Unauthorized");
             transports[0] = object.getTransport();
             countDownLatch.countDown();
@@ -753,8 +752,8 @@ public class ComponentTest {
 
         assertTrue(apis[0].isDebug());
         assertEquals("http://127.0.0.1:80", apis[0].getPath());
-        assertEquals("0.1.0", apis[0].getPlatformVersion());
-        assertEquals("0.1.0", apis[0].getPlatformVersion());
+        assertEquals("0.1.0", apis[0].getFrameworkVersion());
+        assertEquals("0.1.0", apis[0].getFrameworkVersion());
         assertEquals("users", apis[0].getName());
         assertEquals("0.2.0", apis[0].getVersion());
         assertTrue(apis[0].hasResource("resource"));

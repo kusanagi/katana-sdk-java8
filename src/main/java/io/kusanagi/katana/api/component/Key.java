@@ -177,6 +177,7 @@ public class Key {
     public static final String META_PROTOCOL = "p";
     public static final String META_GATEWAY = "g";
     public static final String META_CLIENT = "c";
+    public static final String META_ATTRS = "a";
 
     //Object Field Schema
     public static final String OBJECT_FIELD_SCHEMA_NAME = "n";

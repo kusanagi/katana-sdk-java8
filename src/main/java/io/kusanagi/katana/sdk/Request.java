@@ -15,15 +15,10 @@
 
 package io.kusanagi.katana.sdk;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.Api;
 import io.kusanagi.katana.api.commands.Mapping;
 import io.kusanagi.katana.api.component.Component;
 import io.kusanagi.katana.api.component.Constants;
-import io.kusanagi.katana.api.component.Key;
-import io.kusanagi.katana.api.replies.common.CommandReplyResult;
-import io.kusanagi.katana.api.serializers.ActionEntity;
 import io.kusanagi.katana.api.serializers.HttpResponseEntity;
 import io.kusanagi.katana.api.serializers.RequestEntity;
 import io.kusanagi.katana.api.serializers.ResponseEntity;
@@ -66,18 +61,18 @@ public class Request extends Api {
 
     /**
      *
-     * @return
+     * @return return the UUID of the request.
      */
     public String getId() { //TODO
-        return "";
+        return requestEntity.getMeta().getId();
     }
 
     /**
      *
-     * @return
+     * @return return the creation datetime of the request.
      */
-    public long getTimeStamp(){ //TODO
-        return 0;
+    public String getTimeStamp(){ //TODO
+        return requestEntity.getMeta().getDatetime();
     }
 
     /**
@@ -105,6 +100,19 @@ public class Request extends Api {
      */
     public String getClientAddress() {
         return requestEntity.getMeta().getClient();
+    }
+
+    /**
+     * register a request attribute with the REQUIRED name and REQUIRED value arguments. If an attribute with the
+     * specified name already exists the value MUST be replaced with value. The function MUST NOT accept any other
+     * data type for a value other than string.
+     * @param name attribute name
+     * @param value attribute value
+     * @return return this request
+     */
+    public Request setAttribute(String name, String value) {
+        requestEntity.getMeta().getAttributes().put(name, value);
+        return this;
     }
 
     /**
@@ -250,6 +258,10 @@ public class Request extends Api {
         return param;
     }
 
+    public Param newParam(String name) {
+        return newParam(name, "", "");
+    }
+
     /**
      * @param code ResponseEntity code
      * @param text ResponseEntity text
@@ -273,6 +285,10 @@ public class Request extends Api {
                 .setDebug(this.isDebug)
                 .setMapping(this.mapping)
                 .build();
+    }
+
+    public Response newResponse() {
+        return newResponse(200, "OK");
     }
 
     /**

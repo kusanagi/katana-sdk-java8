@@ -23,7 +23,9 @@ import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.sdk.Callable;
 import io.kusanagi.katana.sdk.ServiceSchema;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -115,7 +117,7 @@ public abstract class Api {
      * @return Return the version of the platform
      */
     @JsonIgnore
-    public String getPlatformVersion() {
+    public String getFrameworkVersion() {
         return platformVersion;
     }
 
@@ -152,6 +154,15 @@ public abstract class Api {
     }
 
     /**
+     *
+     * @param name case-sensitive name argument.
+     * @return determine if a variable has been defined with the REQUIRED case-sensitive name argument.
+     */
+    public boolean hasVariable(String name) {
+        return this.variables.containsKey(name);
+    }
+
+    /**
      * Get the variable with the REQUIRED case-sensitive name argument, and which MUST be returned as a string.
      *
      * @param name Name of the variable
@@ -176,6 +187,27 @@ public abstract class Api {
      */
     public Callable getResource(String name) {
         return this.component.getResource(name);
+    }
+
+    /**
+     *
+     * @return return an array with the Service versions in the stored schema mapping, in which each item MUST be an
+     * object with the key name that MUST have the name of the Service and the key version that MUST have the version of the Service.
+     */
+    public List<Map<String, String>> getServices(){
+        List<Map<String, String>> services = new ArrayList<>();
+
+        for (Map.Entry service : mapping.getServiceSchema().entrySet()) {
+            Map<String, ServiceSchema> versions = mapping.getServiceSchema().get((String) service.getKey());
+            for (Map.Entry version : versions.entrySet()) {
+                Map<String, String> serviceMap = new HashMap<>();
+                serviceMap.put("service", (String) service.getKey());
+                serviceMap.put("version", (String) version.getKey());
+                services.add(serviceMap);
+            }
+        }
+
+        return services;
     }
 
     /**
@@ -207,6 +239,15 @@ public abstract class Api {
     public boolean log(String value) {
         Logger.log(Logger.DEBUG, value);
         return true;
+    }
+
+    /**
+     *
+     * @return This function is only for use in an asynchronous implementation of the SDK, for any other implementation
+     * it MUST return false.
+     */
+    public boolean done(){
+        return false;
     }
 
     @Override

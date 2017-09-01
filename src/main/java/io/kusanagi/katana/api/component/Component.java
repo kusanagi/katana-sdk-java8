@@ -18,7 +18,6 @@ package io.kusanagi.katana.api.component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.kusanagi.katana.api.Api;
 import io.kusanagi.katana.api.commands.Mapping;
-import io.kusanagi.katana.api.commands.common.CommandPayload;
 import io.kusanagi.katana.api.component.utils.Factory;
 import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.api.component.utils.Option;

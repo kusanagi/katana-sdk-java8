@@ -135,6 +135,10 @@ public class HttpRequest {
         return values == null || values.isEmpty() ? defaultValue == null ? "" : defaultValue : values.get(0);
     }
 
+    public String getQueryParam(String name) {
+        return getQueryParam(name, "");
+    }
+
     /**
      * Return the value(s) of the parameter specified by the REQUIRED case sensitive name argument as an array of
      * values.
@@ -152,6 +156,10 @@ public class HttpRequest {
     public List<String> getQueryParamArray(String name, List<String> defaultArray) {
         List<String> values = httpRequestEntity.getQueryParamsArray().get(name);
         return values != null && !values.isEmpty() ? values : defaultArray != null ? defaultArray : new ArrayList<>();
+    }
+
+    public List<String> getQueryParamArray(String name) {
+        return getQueryParamArray(name, new ArrayList<>());
     }
 
     /**
@@ -286,11 +294,28 @@ public class HttpRequest {
         return values == null || values.isEmpty() ? defaultValue == null ? "" : defaultValue : values.get(0);
     }
 
+    public String getHeader(String name) {
+        return getHeader(name, "");
+    }
+
     /**
-     * @return Return an object with the HTTP headers provided in the request, where each property name is the header
-     * name, and the value the header value as a string.
+     * @return return an object with the HTTP headers provided in the request, where each property name is the header name, and the value the header value as a string. If more than 1 value exists for an HTTP header it MUST use the value of the first occurrence in the request.
      */
-    public Map<String, List<String>> getHeaders() { //TODO return the value of the headers as a string
+    public Map<String, String> getHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        for (Map.Entry key : httpRequestEntity.getHeaders().entrySet() ){
+            if (!httpRequestEntity.getHeaders().get((String)key.getKey()).isEmpty()) {
+                headers.put((String) key.getKey(), httpRequestEntity.getHeaders().get((String) key.getKey()).get(0));
+            }
+        }
+        return headers;
+    }
+
+    /**
+     *
+     * @return return an object with the HTTP headers provided in the request, where each property name is the HTTP header name, and the value an array with the HTTP header value(s), each as a string.
+     */
+    public Map<String, List<String>> getHeadersArray() { //TODO return the value of the headers as a string
         return httpRequestEntity.getHeaders();
     }
 

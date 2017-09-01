@@ -138,11 +138,15 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return the value of the HTTP header with the name specified by the REQUIRED case sensitive name
      * argument, or an empty string if the header does not exist.
      */
-    public String getHeader(String name) {
+    public String getHeader(String name, String defaultValue) {
         if (!httpResponseEntity.getHeaders().containsKey(name)) {
-            return "";
+            return defaultValue;
         }
         return httpResponseEntity.getHeaders().get(name).get(0);
+    }
+
+    public String getHeader(String name) {
+        return getHeader(name, "");
     }
 
     /**
@@ -151,7 +155,43 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return an object with the HTTP headers defined for the response, where each property name is the header
      * name, and the value the header value as a string.
      */
-    public Map<String, List<String>> getHeaders() {
+    public List<String> getHeaderArray(String name, List<String> defaultArray) {
+        if (httpResponseEntity.getHeaders() == null) {
+            httpResponseEntity.setHeaders(new HashMap<>());
+        }
+        if (!httpResponseEntity.getHeaders().containsKey(name)) {
+            return defaultArray;
+        }
+        return httpResponseEntity.getHeaders().get(name);
+    }
+
+    public List<String> getHeaderArray(String name) {
+        return getHeaderArray(name, new ArrayList<>());
+    }
+
+    /**
+     * Headers getter
+     *
+     * @return Return an object with the HTTP headers defined for the response, where each property name is the header
+     * name, and the value the header value as a string.
+     */
+    public Map<String, String> getHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        for (Map.Entry key : httpResponseEntity.getHeaders().entrySet() ){
+            if (!httpResponseEntity.getHeaders().get((String)key.getKey()).isEmpty()) {
+                headers.put((String) key.getKey(), httpResponseEntity.getHeaders().get((String) key.getKey()).get(0));
+            }
+        }
+        return headers;
+    }
+
+    /**
+     * Headers getter
+     *
+     * @return Return an object with the HTTP headers defined for the response, where each property name is the header
+     * name, and the value the header value as a string.
+     */
+    public Map<String, List<String>> getHeadersArray() {
         if (httpResponseEntity.getHeaders() == null) {
             httpResponseEntity.setHeaders(new HashMap<>());
         }
@@ -205,6 +245,9 @@ public class HttpResponse implements CommandReplyResult {
     public HttpResponse setBody(String body) {
         httpResponseEntity.setBody(body == null ? "" : body);
         return this;
+    }
+    public HttpResponse setBody() {
+        return setBody("");
     }
 
     public static class Builder {
