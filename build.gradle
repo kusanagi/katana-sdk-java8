@@ -20,7 +20,7 @@ apply plugin: 'signing'
 
 group 'io.kusanagi'
 archivesBaseName = "katana-sdk-java8"
-version '1.1.0'
+version '1.2.0'
 
 mainClassName = 'io.kusanagi.katana.api.component.Component'
 

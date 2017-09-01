@@ -10,7 +10,7 @@ Java SDK to interface with the **KATANA**™ framework (https://kusanagi.io).
 Requirements
 ------------
 
-* KATANA Framework 1.1
+* KATANA Framework 1.2
 * [JDK](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) 1.8
 * [libzmq](http://zeromq.org/intro:get-the-software) 4.1.5+
 
@@ -33,7 +33,7 @@ If using **Maven**, add the following in your `pom.xml` file:
 <dependency>
     <groupId>io.kusanagi</groupId>
     <artifactId>katana-sdk-java8</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -41,7 +41,7 @@ Or, if using **Gradle**, add the following in your `build.gradle` file:
 
 ```gradle
 dependencies {
-    compile group: 'io.kusanagi', name: 'katana-sdk-java8', version: '1.1.0'
+    compile group: 'io.kusanagi', name: 'katana-sdk-java8', version: '1.2.0'
 }
 ```
 
