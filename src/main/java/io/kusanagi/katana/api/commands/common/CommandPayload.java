@@ -16,14 +16,13 @@
 package io.kusanagi.katana.api.commands.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.kusanagi.katana.api.Api;
 import io.kusanagi.katana.api.component.Key;
 
 /**
  * Created by juan on 26/09/16.
  */
 
-public class CommandPayload<T extends Api> {
+public class CommandPayload<T> {
 
     /**
      * Meta-data associated with the command
@@ -78,7 +77,7 @@ public class CommandPayload<T extends Api> {
                 '}';
     }
 
-    public static class Command<T extends Api> {
+    public static class Command<T> {
 
         /**
          * The name of the command to call

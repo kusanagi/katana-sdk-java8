@@ -16,9 +16,8 @@
 package io.kusanagi.katana.sdk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
+import io.kusanagi.katana.api.serializers.HttpResponseEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,49 +29,15 @@ import java.util.Map;
  * Katana Java SDK
  */
 public class HttpResponse implements CommandReplyResult {
-    /**
-     * The HTTP version of the response
-     */
-    @JsonProperty(Key.HTTP_RESPONSE_PROTOCOL_VERSION)
-    private String protocolVersion;
 
-    /**
-     * The HTTP status code and text for the response
-     */
-    @JsonProperty(Key.HTTP_RESPONSE_STATUS)
-    private String status;
+    private HttpResponseEntity httpResponseEntity;
 
-    /**
-     * An object, where each property is the name of the HTTP header, and the value the header value, if no headers
-     * exist this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.HTTP_RESPONSE_HEADERS)
-    private Map<String, List<String>> headers;
-
-    /**
-     * The contents of the HTTP response body
-     */
-    @JsonProperty(Key.HTTP_RESPONSE_BODY)
-    private String body;
-
-    public HttpResponse() {
-        // Default constructor to make possible the serialization of this object.
+    private HttpResponse(HttpResponseEntity httpResponseEntity){
+        this.httpResponseEntity = httpResponseEntity;
     }
 
     public HttpResponse(HttpResponse other) {
-        this.protocolVersion = other.protocolVersion;
-        this.status = other.status;
-        this.headers = other.headers;
-        this.body = other.body;
-    }
-
-    /**
-     * Set a HTTP header for the response, with the name specified by the REQUIRED name argument and the value specified by the REQUIRED value argument.
-     *
-     * @param headers Headers to set
-     */
-    public void setHeaders(Map<String, List<String>> headers) {
-        this.headers = headers;
+        this.httpResponseEntity = other.httpResponseEntity;
     }
 
     // SDK Methods
@@ -84,7 +49,7 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return true if the response has the protocolVersion specified in the parameter
      */
     public boolean isProtocolVersion(String version) {
-        return this.protocolVersion.equals(version);
+        return httpResponseEntity.getProtocolVersion().equals(version);
     }
 
     /**
@@ -92,7 +57,7 @@ public class HttpResponse implements CommandReplyResult {
      */
     @JsonIgnore
     public String getProtocolVersion() {
-        return protocolVersion;
+        return httpResponseEntity.getProtocolVersion();
     }
 
     /**
@@ -101,7 +66,7 @@ public class HttpResponse implements CommandReplyResult {
      * @param version Protocol protocolVersion to set
      */
     public HttpResponse setProtocolVersion(String version) {
-        this.protocolVersion = version;
+        httpResponseEntity.setProtocolVersion(version);
         return this;
     }
 
@@ -113,7 +78,7 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return true if the status is the same as the one specified in the argument.
      */
     public boolean isStatus(String status) {
-        return this.status.equals(status);
+        return httpResponseEntity.getStatus().equals(status);
     }
 
     /**
@@ -122,7 +87,7 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return the value set for the HTTP status code and text of the response.
      */
     public String getStatus() {
-        return status;
+        return httpResponseEntity.getStatus();
     }
 
     /**
@@ -130,7 +95,7 @@ public class HttpResponse implements CommandReplyResult {
      */
     @JsonIgnore
     public int getStatusCode() {
-        return Integer.valueOf(status.split(" ")[0]);
+        return Integer.valueOf(httpResponseEntity.getStatus().split(" ")[0]);
     }
 
     /**
@@ -138,7 +103,7 @@ public class HttpResponse implements CommandReplyResult {
      */
     @JsonIgnore
     public String getStatusText() {
-        String[] split = status.split(" ");
+        String[] split = httpResponseEntity.getStatus().split(" ");
         StringBuilder statusText = new StringBuilder();
         for (int i = 1; i < split.length; i++) {
             statusText.append(split[i]);
@@ -154,7 +119,7 @@ public class HttpResponse implements CommandReplyResult {
      * @param text HTTP status text of the response.
      */
     public HttpResponse setStatus(int code, String text) {
-        this.status = code + " " + text;
+        httpResponseEntity.setStatus(code + " " + text);
         return this;
     }
 
@@ -165,7 +130,7 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return true if the response contains the header specified in the parameter
      */
     public boolean hasHeader(String name) {
-        return this.headers.containsKey(name);
+        return httpResponseEntity.getHeaders().containsKey(name);
     }
 
     /**
@@ -173,11 +138,15 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return the value of the HTTP header with the name specified by the REQUIRED case sensitive name
      * argument, or an empty string if the header does not exist.
      */
-    public String getHeader(String name) {
-        if (!this.headers.containsKey(name)) {
-            return "";
+    public String getHeader(String name, String defaultValue) {
+        if (!httpResponseEntity.getHeaders().containsKey(name)) {
+            return defaultValue;
         }
-        return this.headers.get(name).get(0);
+        return httpResponseEntity.getHeaders().get(name).get(0);
+    }
+
+    public String getHeader(String name) {
+        return getHeader(name, "");
     }
 
     /**
@@ -186,29 +155,65 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return an object with the HTTP headers defined for the response, where each property name is the header
      * name, and the value the header value as a string.
      */
-    public Map<String, List<String>> getHeaders() {
-        if (this.headers == null) {
-            this.headers = new HashMap<>();
+    public List<String> getHeaderArray(String name, List<String> defaultArray) {
+        if (httpResponseEntity.getHeaders() == null) {
+            httpResponseEntity.setHeaders(new HashMap<>());
+        }
+        if (!httpResponseEntity.getHeaders().containsKey(name)) {
+            return defaultArray;
+        }
+        return httpResponseEntity.getHeaders().get(name);
+    }
+
+    public List<String> getHeaderArray(String name) {
+        return getHeaderArray(name, new ArrayList<>());
+    }
+
+    /**
+     * Headers getter
+     *
+     * @return Return an object with the HTTP headers defined for the response, where each property name is the header
+     * name, and the value the header value as a string.
+     */
+    public Map<String, String> getHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        for (Map.Entry key : httpResponseEntity.getHeaders().entrySet() ){
+            if (!httpResponseEntity.getHeaders().get((String)key.getKey()).isEmpty()) {
+                headers.put((String) key.getKey(), httpResponseEntity.getHeaders().get((String) key.getKey()).get(0));
+            }
         }
         return headers;
     }
 
     /**
-     * Add a header to the Http Response
+     * Headers getter
+     *
+     * @return Return an object with the HTTP headers defined for the response, where each property name is the header
+     * name, and the value the header value as a string.
+     */
+    public Map<String, List<String>> getHeadersArray() {
+        if (httpResponseEntity.getHeaders() == null) {
+            httpResponseEntity.setHeaders(new HashMap<>());
+        }
+        return httpResponseEntity.getHeaders();
+    }
+
+    /**
+     * Add a header to the Http ResponseEntity
      *
      * @param name  Header name
      * @param value Header value
      */
     public HttpResponse setHeader(String name, String value) {
-        if (this.headers != null && this.headers.containsKey(name)) {
-            this.headers.get(name).add(value);
+        if (httpResponseEntity.getHeaders() != null && httpResponseEntity.getHeaders().containsKey(name)) {
+            httpResponseEntity.getHeaders().get(name).add(value);
         } else {
-            if (this.headers == null) {
-                this.headers = new HashMap<>();
+            if (httpResponseEntity.getHeaders() == null) {
+                httpResponseEntity.setHeaders(new HashMap<>());
             }
             List<String> values = new ArrayList<>();
             values.add(value);
-            this.headers.put(name, values);
+            httpResponseEntity.getHeaders().put(name, values);
         }
         return this;
     }
@@ -219,7 +224,7 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return true if the response has a body
      */
     public boolean hasBody() {
-        return this.body != null;
+        return httpResponseEntity.getBody() != null;
     }
 
     /**
@@ -228,7 +233,7 @@ public class HttpResponse implements CommandReplyResult {
      * @return Return the content set for the body of the HTTP response.
      */
     public String getBody() {
-        return body;
+        return httpResponseEntity.getBody();
     }
 
     /**
@@ -238,8 +243,28 @@ public class HttpResponse implements CommandReplyResult {
      * @param body Body to set
      */
     public HttpResponse setBody(String body) {
-        this.body = body == null ? "" : body;
+        httpResponseEntity.setBody(body == null ? "" : body);
         return this;
+    }
+    public HttpResponse setBody() {
+        return setBody("");
+    }
+
+    public static class Builder {
+
+        private HttpResponseEntity httpResponseEntity;
+
+        public Builder() {
+        }
+
+        public HttpResponse.Builder setHttpResponseEntity(HttpResponseEntity httpResponseEntity) {
+            this.httpResponseEntity = httpResponseEntity;
+            return this;
+        }
+
+        public HttpResponse build(){
+            return new HttpResponse(httpResponseEntity);
+        }
     }
 
     @Override
@@ -247,41 +272,24 @@ public class HttpResponse implements CommandReplyResult {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof HttpResponse)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         HttpResponse that = (HttpResponse) o;
 
-        if (!getProtocolVersion().equals(that.getProtocolVersion())) {
-            return false;
-        }
-        if (!getStatus().equals(that.getStatus())) {
-            return false;
-        }
-        if (!getHeaders().equals(that.getHeaders())) {
-            return false;
-        }
-        return getBody() != null ? getBody().equals(that.getBody()) : that.getBody() == null;
-
+        return httpResponseEntity != null ? httpResponseEntity.equals(that.httpResponseEntity) : that.httpResponseEntity == null;
     }
 
     @Override
     public int hashCode() {
-        int result = getProtocolVersion().hashCode();
-        result = 31 * result + getStatus().hashCode();
-        result = 31 * result + getHeaders().hashCode();
-        result = 31 * result + getBody().hashCode();
-        return result;
+        return httpResponseEntity != null ? httpResponseEntity.hashCode() : 0;
     }
 
     @Override
     public String toString() {
         return "HttpResponse{" +
-                "protocolVersion='" + protocolVersion + '\'' +
-                ", status='" + status + '\'' +
-                ", headers=" + headers +
-                ", body='" + body + '\'' +
+                "httpResponseEntity=" + httpResponseEntity +
                 '}';
     }
 }

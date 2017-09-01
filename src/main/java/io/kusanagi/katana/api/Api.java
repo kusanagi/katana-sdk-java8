@@ -23,13 +23,15 @@ import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.sdk.Callable;
 import io.kusanagi.katana.sdk.ServiceSchema;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by juan on 28/08/16.
  */
-public class Api {
+public abstract class Api {
 
     protected Component component;
 
@@ -76,6 +78,18 @@ public class Api {
         this.isDebug = isDebug;
     }
 
+    public Api(Component component, String path, String name, String version, String platformVersion,
+               Map<String, String> variables, boolean isDebug, Mapping mapping) {
+        this.component = component;
+        this.path = path;
+        this.name = name;
+        this.version = version;
+        this.platformVersion = platformVersion;
+        this.variables = variables;
+        this.isDebug = isDebug;
+        this.mapping = mapping;
+    }
+
     public Api(Api other) {
         this.path = other.path;
         this.name = other.name;
@@ -85,70 +99,8 @@ public class Api {
         this.isDebug = other.isDebug;
     }
 
-    /**
-     * Path setter
-     *
-     * @param path Path of the call
-     */
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    /**
-     * Name setter
-     *
-     * @param name Name of the Service
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Version setter
-     *
-     * @param version Version of the service
-     */
-    public void setProtocolVersion(String version) {
-        this.version = version;
-    }
-
-    /**
-     * Platform version setter
-     *
-     * @param platformVersion Version of the platform
-     */
-    public void setPlatformVersion(String platformVersion) {
-        this.platformVersion = platformVersion;
-    }
-
-    /**
-     * Variables setter
-     *
-     * @param variables Sdk variables
-     */
-    public void setVariables(Map<String, String> variables) {
-        this.variables = variables;
-    }
-
-    /**
-     * Debug state setter
-     *
-     * @param debug Debug state
-     */
-    public void setDebug(boolean debug) {
-        isDebug = debug;
-    }
-
     public Mapping getMapping() {
         return mapping;
-    }
-
-    public void setMapping(Mapping mapping) {
-        this.mapping = mapping;
-    }
-
-    public void setComponent(Component component) {
-        this.component = component;
     }
 
     // SDK Method
@@ -165,7 +117,7 @@ public class Api {
      * @return Return the version of the platform
      */
     @JsonIgnore
-    public String getPlatformVersion() {
+    public String getFrameworkVersion() {
         return platformVersion;
     }
 
@@ -202,6 +154,15 @@ public class Api {
     }
 
     /**
+     *
+     * @param name case-sensitive name argument.
+     * @return determine if a variable has been defined with the REQUIRED case-sensitive name argument.
+     */
+    public boolean hasVariable(String name) {
+        return this.variables.containsKey(name);
+    }
+
+    /**
      * Get the variable with the REQUIRED case-sensitive name argument, and which MUST be returned as a string.
      *
      * @param name Name of the variable
@@ -226,6 +187,27 @@ public class Api {
      */
     public Callable getResource(String name) {
         return this.component.getResource(name);
+    }
+
+    /**
+     *
+     * @return return an array with the Service versions in the stored schema mapping, in which each item MUST be an
+     * object with the key name that MUST have the name of the Service and the key version that MUST have the version of the Service.
+     */
+    public List<Map<String, String>> getServices(){
+        List<Map<String, String>> services = new ArrayList<>();
+
+        for (Map.Entry service : mapping.getServiceSchema().entrySet()) {
+            Map<String, ServiceSchema> versions = mapping.getServiceSchema().get((String) service.getKey());
+            for (Map.Entry version : versions.entrySet()) {
+                Map<String, String> serviceMap = new HashMap<>();
+                serviceMap.put("service", (String) service.getKey());
+                serviceMap.put("version", (String) version.getKey());
+                services.add(serviceMap);
+            }
+        }
+
+        return services;
     }
 
     /**
@@ -257,6 +239,15 @@ public class Api {
     public boolean log(String value) {
         Logger.log(Logger.DEBUG, value);
         return true;
+    }
+
+    /**
+     *
+     * @return This function is only for use in an asynchronous implementation of the SDK, for any other implementation
+     * it MUST return false.
+     */
+    public boolean done(){
+        return false;
     }
 
     @Override
@@ -319,5 +310,93 @@ public class Api {
                 ", isDebug=" + isDebug +
                 ", mapping=" + mapping +
                 '}';
+    }
+
+    public abstract static class Builder<T> {
+        private Component component;
+        private String path;
+        private String name;
+        private String version;
+        private String platformVersion;
+        private Map<String, String> variables;
+        private boolean isDebug;
+        private Mapping mapping;
+
+        public Builder() {
+        }
+
+        public Builder<T> setComponent(Component component) {
+            this.component = component;
+            return this;
+        }
+
+        public Builder<T> setPath(String path) {
+            this.path = path;
+            return this;
+        }
+
+        public Builder<T> setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder<T> setVersion(String version) {
+            this.version = version;
+            return this;
+        }
+
+        public Builder<T> setPlatformVersion(String platformVersion) {
+            this.platformVersion = platformVersion;
+            return this;
+        }
+
+        public Builder<T> setVariables(Map<String, String> variables) {
+            this.variables = variables;
+            return this;
+        }
+
+        public Builder<T> setDebug(boolean debug) {
+            isDebug = debug;
+            return this;
+        }
+
+        public Builder<T> setMapping(Mapping mapping) {
+            this.mapping = mapping;
+            return this;
+        }
+
+        public Component getComponent() {
+            return component;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public String getPlatformVersion() {
+            return platformVersion;
+        }
+
+        public Map<String, String> getVariables() {
+            return variables;
+        }
+
+        public boolean isDebug() {
+            return isDebug;
+        }
+
+        public Mapping getMapping() {
+            return mapping;
+        }
+
+        public abstract T build();
     }
 }

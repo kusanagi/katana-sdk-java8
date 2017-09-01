@@ -31,7 +31,7 @@ public class CallTest {
         Assert.assertEquals(object, new Call(object));
         Assert.assertEquals(1937583924, object.hashCode());
         Assert.assertEquals(
-                "Call{duration=0, name='posts', version='1.2.0', action='list', caller='null', params=[Param{name='X-Request-Token', value='ac3bd4b8-7da3-4c40-8661-746adfa55e0d', type='string', exists=false}, Param{name='user_id', value='123', type='integer', exists=false}], gateway='null', timeout=0}",
+                "Call{duration=0, name='posts', version='1.2.0', action='list', caller='null', params=[Param{name='X-Request-Token', value=ac3bd4b8-7da3-4c40-8661-746adfa55e0d, type='string', exists=false}, Param{name='user_id', value=123, type='integer', exists=false}], gateway='null', timeout=0}",
                 object.toString());
     }
 

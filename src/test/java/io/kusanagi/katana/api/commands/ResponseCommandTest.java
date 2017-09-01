@@ -32,7 +32,7 @@ public class ResponseCommandTest {
         MockFactory mockFactory = new MockFactory();
         ResponseCommandPayload.ResponseCommand object = mockFactory.getResponseCommand();
         Assert.assertEquals(object, new ResponseCommandPayload.ResponseCommand(object));
-        Assert.assertEquals(1269445463, object.hashCode());
+        Assert.assertEquals(1444143587, object.hashCode());
     }
 
 }

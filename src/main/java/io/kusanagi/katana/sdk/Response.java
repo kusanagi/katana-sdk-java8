@@ -16,10 +16,10 @@
 package io.kusanagi.katana.sdk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.Api;
+import io.kusanagi.katana.api.commands.Mapping;
 import io.kusanagi.katana.api.component.Component;
-import io.kusanagi.katana.api.component.Key;
+import io.kusanagi.katana.api.serializers.ResponseEntity;
 
 import java.util.Map;
 
@@ -28,74 +28,34 @@ import java.util.Map;
  */
 public class Response extends Api {
 
-    /**
-     * The meta-information about the payload
-     */
-    @JsonProperty(Key.RESPONSE_META)
-    private Meta meta;
+    private ResponseEntity responseEntity;
 
-    /**
-     * The semantics of the original request
-     */
-    @JsonProperty(Key.RESPONSE_HTTP_REQUEST)
     private HttpRequest httpRequest;
 
-    /**
-     * The semantics of the response
-     */
-    @JsonProperty(Key.RESPONSE_HTTP_RESPONSE)
     private HttpResponse httpResponse;
 
-    /**
-     * The Transport instance
-     */
-    @JsonProperty(Key.RESPONSE_TRANSPORT)
     private Transport transport;
-
-    /**
-     * The value returned by the initial **Service** called in the request
-     */
-    @JsonProperty(Key.RESPONSE_RETURN)
-    private Object returnObject;
 
     public Response() {
         // Default constructor to make possible the serialization of this object.
     }
 
-    public Response(Response other) {
-        super(other);
-        this.meta = other.meta;
-        this.httpRequest = other.httpRequest;
-        this.httpResponse = other.httpResponse;
-        this.transport = other.transport;
-    }
-
-    public Response(Component component, String path, String name, String version, String platformVersion, Map<String, String> variables, boolean isDebug) {
-        super(component, path, name, version, platformVersion, variables, isDebug);
-    }
-
-    public Meta getMeta() {
-        return meta;
-    }
-
-    public void setMeta(Meta meta) {
-        this.meta = meta;
-    }
-
-    public void setHttpResponse(HttpResponse httpResponse) {
+    public Response(Component component, String path, String name, String version, String platformVersion,
+                    Map<String, String> variables, boolean isDebug, Mapping mapping, ResponseEntity responseEntity,
+                    HttpRequest httpRequest, HttpResponse httpResponse, Transport transport) {
+        super(component, path, name, version, platformVersion, variables, isDebug, mapping);
+        this.responseEntity = responseEntity;
+        this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
-    }
-
-    public void setTransport(Transport transport) {
         this.transport = transport;
     }
 
-    public Object getReturnObject() {
-        return returnObject;
-    }
-
-    public void setReturnObject(Object returnObject) {
-        this.returnObject = returnObject;
+    public Response(Response other) {
+        super(other);
+        this.responseEntity = other.responseEntity;
+        this.httpRequest = other.httpRequest;
+        this.httpResponse = other.httpResponse;
+        this.transport = other.transport;
     }
 
     // SDK METHODS
@@ -105,7 +65,7 @@ public class Response extends Api {
      */
     @JsonIgnore
     public String getGatewayProtocol() {
-        return this.meta.getProtocol();
+        return responseEntity.getMeta().getProtocol();
     }
 
     /**
@@ -113,7 +73,34 @@ public class Response extends Api {
      */
     @JsonIgnore
     public String getGatewayAddress() {
-        return this.meta.getGateway().get(1);
+        return responseEntity.getMeta().getGateway().get(1);
+    }
+
+    /**
+     * get a request attribute with the REQUIRED case sensitive name argument.
+     The default argument is the OPTIONAL value to use if the request attribute does not exist. If the request attribute
+     is defined, but does not have a value, the value of the default argument SHOULD NOT be applied.
+     If a request attribute with the specified name does not exist, and no default is provided, an empty string MUST be returned.
+     * @param name attribute name
+     * @param defaultValue default value
+     * @return attribute value
+     */
+    public String getRequestAttribute(String name, String defaultValue){
+        String attr = responseEntity.getMeta().getAttributes().get(name);
+        return attr == null ? defaultValue : attr;
+    }
+
+    public String getRequestAttribute(String name){
+        return getRequestAttribute(name, "");
+    }
+
+    /**
+     *
+     * @return return an object with the request attributes, where each property is a request attribute name, and its
+     * value the attribute's value.
+     */
+    public Map<String, String> getRequestAttributes(){
+        return responseEntity.getMeta().getAttributes();
     }
 
     /**
@@ -136,7 +123,7 @@ public class Response extends Api {
      * in its command reply.
      */
     public boolean hasReturn(){
-        return this.returnObject != null;
+        return responseEntity.getReturnObject() != null;
     }
 
     /**
@@ -145,10 +132,10 @@ public class Response extends Api {
      */
     @JsonIgnore
     public Object getReturn(){
-        if (this.returnObject == null){
+        if (responseEntity.getReturnObject() == null){
             throw new IllegalArgumentException("No return value defined on " + getName() + " (" + version + ")");//TODO add action to the error message
         }
-        return getReturnObject();
+        return responseEntity.getReturnObject();
     }
 
     /**
@@ -156,6 +143,42 @@ public class Response extends Api {
      */
     public Transport getTransport() {
         return transport;
+    }
+
+    public static class Builder extends Api.Builder<Response>{
+
+        private ResponseEntity responseEntity;
+        private HttpRequest httpRequest;
+        private HttpResponse httpResponse;
+        private Transport transport;
+
+        public Builder() {
+        }
+
+        public Response.Builder setResponseEntity(ResponseEntity responseEntity) {
+            this.responseEntity = responseEntity;
+            this.httpRequest = new HttpRequest.Builder().setHttpRequestEntity(responseEntity.getHttpRequest()).build();
+            this.httpResponse = new HttpResponse.Builder().setHttpResponseEntity(responseEntity.getHttpResponse()).build();
+            this.transport = new Transport.Builder().setTransportEntity(responseEntity.getTransport()).build();
+            return this;
+        }
+
+        public Response build(){
+            return new Response(
+                    getComponent(),
+                    getPath(),
+                    getName(),
+                    getVersion(),
+                    getPlatformVersion(),
+                    getVariables(),
+                    isDebug(),
+                    getMapping(),
+                    responseEntity,
+                    httpRequest,
+                    httpResponse,
+                    transport
+            );
+        }
     }
 
     @Override
@@ -172,7 +195,7 @@ public class Response extends Api {
 
         Response response = (Response) o;
 
-        if (meta != null ? !meta.equals(response.meta) : response.meta != null) {
+        if (responseEntity != null ? !responseEntity.equals(response.responseEntity) : response.responseEntity != null) {
             return false;
         }
         if (httpRequest != null ? !httpRequest.equals(response.httpRequest) : response.httpRequest != null) {
@@ -181,31 +204,26 @@ public class Response extends Api {
         if (httpResponse != null ? !httpResponse.equals(response.httpResponse) : response.httpResponse != null) {
             return false;
         }
-        if (transport != null ? !transport.equals(response.transport) : response.transport != null) {
-            return false;
-        }
-        return returnObject != null ? returnObject.equals(response.returnObject) : response.returnObject == null;
+        return transport != null ? transport.equals(response.transport) : response.transport == null;
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + (meta != null ? meta.hashCode() : 0);
+        result = 31 * result + (responseEntity != null ? responseEntity.hashCode() : 0);
         result = 31 * result + (httpRequest != null ? httpRequest.hashCode() : 0);
         result = 31 * result + (httpResponse != null ? httpResponse.hashCode() : 0);
         result = 31 * result + (transport != null ? transport.hashCode() : 0);
-        result = 31 * result + (returnObject != null ? returnObject.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "Response{" +
-                "meta=" + meta +
+                "responseEntity=" + responseEntity +
                 ", httpRequest=" + httpRequest +
                 ", httpResponse=" + httpResponse +
                 ", transport=" + transport +
-                ", returnObject=" + returnObject +
                 '}';
     }
 }

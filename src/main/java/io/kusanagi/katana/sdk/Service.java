@@ -17,12 +17,15 @@ package io.kusanagi.katana.sdk;
 
 import io.kusanagi.katana.api.commands.ActionCommandPayload;
 import io.kusanagi.katana.api.commands.Mapping;
+import io.kusanagi.katana.api.commands.common.CommandPayload;
 import io.kusanagi.katana.api.component.Component;
 import io.kusanagi.katana.api.component.Constants;
-import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.api.replies.TransportReplyPayload;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
+import io.kusanagi.katana.api.serializers.ActionEntity;
+import io.kusanagi.katana.api.serializers.TransportEntity;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,18 +67,14 @@ public class Service extends Component<Action, TransportReplyPayload, Service> {
     }
 
     @Override
-    protected Class<ActionCommandPayload> getCommandPayloadClass(String componentType) {
-        return ActionCommandPayload.class;
-    }
-
-    @Override
-    protected CommandReplyResult getReply(String componentType, Action response) {
-        return response.getTransport();
+    protected CommandReplyResult getReply(String componentType, Action action) {
+        return action.getTransport();
     }
 
     @Override
     protected byte[] getReplyMetadata(TransportReplyPayload reply) {
-        Transport transport = reply.getCommandReply().getResult().getTransport();
+        TransportEntity transport = reply.getCommandReply().getResult().getTransport();
+
         byte callsByte = Constants.VOID_BYTE;
         byte filesByte = Constants.VOID_BYTE;
         byte transactionsByte = Constants.VOID_BYTE;
@@ -93,7 +92,7 @@ public class Service extends Component<Action, TransportReplyPayload, Service> {
             transactionsByte = Constants.TRANSACTION_BYTE;
             byteSize++;
         }
-        if (transport.getDownload() != null) {
+        if (transport.getBody() != null) {
             downloadByte = Constants.DOWNLOAD_BYTE;
             byteSize++;
         }
@@ -125,22 +124,63 @@ public class Service extends Component<Action, TransportReplyPayload, Service> {
     }
 
     @Override
-    protected void setBaseCommandAttrs(String componentType, Mapping mapping, Action command) {
-        super.setBaseCommandAttrs(componentType, mapping, command);
-        command.setActionName(componentType);
-        command.setPath(command.getTransport().getMeta().getGateway().get(1));
-        Logger.setId(command.getTransport().getMeta().getId());
+    protected Action getSdkCommand(String componentType, Mapping mappings, byte[] commandBytes) throws IOException {
+        CommandPayload<ActionEntity> command = serializer.deserialize(commandBytes, ActionCommandPayload.class);
+        ActionEntity actionEntity = command.getCommand().getArgument();
+        actionEntity.setActionName(componentType);
+        return new Action.Builder()
+                .setActionEntity(actionEntity)
+                .setComponent(this)
+                .setPath(actionEntity.getTransport().getMeta().getGateway().get(1))
+                .setName(this.getName())
+                .setVersion(this.getVersion())
+                .setPlatformVersion(this.getFrameworkVersion())
+                .setVariables(this.getVar())
+                .setDebug(this.isDebug())
+                .setMapping(mappings)
+                .build();
     }
 
     @Override
-    protected TransportReplyPayload getCommandReplyPayload(String componentType, Action response) {
+    protected Action getSdkCommand(String componentType, Mapping mappings, String jsonCommand) throws IOException {
+        CommandPayload<ActionEntity> command = serializer.deserialize(jsonCommand, ActionCommandPayload.class);
+        ActionEntity actionEntity = command.getCommand().getArgument();
+        actionEntity.setActionName(componentType);
+        return new Action.Builder()
+                .setActionEntity(actionEntity)
+                .setComponent(this)
+                .setPath(actionEntity.getTransport().getMeta().getGateway().get(1))
+                .setName(this.getName())
+                .setVersion(this.getVersion())
+                .setPlatformVersion(this.getFrameworkVersion())
+                .setVariables(this.getVar())
+                .setDebug(this.isDebug())
+                .setMapping(mappings)
+                .build();
+    }
+
+    @Override
+    protected TransportReplyPayload getCommandReplyPayload(String componentType, Action action) {
         TransportReplyPayload commandReplyPayload = new TransportReplyPayload();
         TransportReplyPayload.TransportCommandReply transportCommandReply = new TransportReplyPayload.TransportCommandReply();
         TransportReplyPayload.TransportResult transportResult = new TransportReplyPayload.TransportResult();
 
-        transportResult.setTransport((Transport) getReply(componentType, response));
+        Transport transport = (Transport) getReply(componentType, action);
 
-        transportResult.setReturnObject(response.getReturnObject());
+        TransportEntity transportEntity = new TransportEntity();
+        transportEntity.setMeta(transport.getMeta());
+        transportEntity.setBody(transport.getBody());
+        transportEntity.setFiles(transport.getFilesEntity());
+        transportEntity.setData(transport.getData());
+        transportEntity.setRelations(transport.getRelations());
+        transportEntity.setLinks(transport.getLinks());
+        transportEntity.setCalls(transport.getCalls());
+        transportEntity.setTransactions(transport.getTransactions());
+        transportEntity.setErrors(transport.getErrors());
+
+        transportResult.setTransport(transportEntity);
+
+        transportResult.setReturnObject(action.getReturnObject());
 
         transportCommandReply.setName(getName());
         transportCommandReply.setResult(transportResult);

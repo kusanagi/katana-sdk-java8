@@ -16,9 +16,8 @@
 package io.kusanagi.katana.sdk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.api.component.utils.Logger;
+import io.kusanagi.katana.api.serializers.HttpRequestEntity;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,104 +31,15 @@ import java.util.Map;
  * Katana Java SDK
  */
 public class HttpRequest {
-    /**
-     * The HTTP version of the request
-     */
-    @JsonProperty(Key.HTTP_REQUEST_PROTOCOL_VERSION)
-    private String protocolVersion;
 
-    /**
-     * The HTTP method used for the request
-     */
-    @JsonProperty(Key.HTTP_REQUEST_METHOD)
-    private String method;
+    private HttpRequestEntity httpRequestEntity;
 
-    /**
-     * The URL used for the request
-     */
-    @JsonProperty(Key.HTTP_REQUEST_URL)
-    private String url;
-
-    /**
-     * An object, where each property is the name of the query string parameter, and the value an array with the
-     * parameter value(s), if no query string exists this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.HTTP_REQUEST_QUERY_PARAMS_ARRAY)
-    private Map<String, List<String>> queryParamsArray;
-
-    /**
-     * An object, where each property is the name of the post data parameter, and the value an array with the parameter
-     * value(s), if no post data exists this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.HTTP_REQUEST_POST_PARAMS_ARRAY)
-    private Map<String, List<String>> postParamsArray;
-
-    /**
-     * An object, where each property is the name of the HTTP header, and the value the header value, if no headers
-     * exist this property SHOULD NOT be defined
-     */
-    @JsonProperty(Key.HTTP_REQUEST_HEADERS)
-    private Map<String, List<String>> headers;
-
-    /**
-     * The contents of the HTTP request body, if no content exists in the body an empty string MUST be assumed
-     */
-    @JsonProperty(Key.HTTP_REQUEST_BODY)
-    private String body;
-
-    /**
-     * An array of File objects which were uploaded in the request, if no files were uploaded this property SHOULD NOT
-     * be defined
-     */
-    @JsonProperty(Key.HTTP_REQUEST_FILES)
-    private List<File> files;
-
-    public HttpRequest() {
-        // Default constructor to make possible the serialization of this object.
-        this.body = "";
+    private HttpRequest(HttpRequestEntity httpRequestEntity){
+        this.httpRequestEntity = httpRequestEntity;
     }
 
     public HttpRequest(HttpRequest other) {
-        this.protocolVersion = other.protocolVersion;
-        this.method = other.method;
-        this.url = other.url;
-        this.queryParamsArray = other.queryParamsArray;
-        this.postParamsArray = other.postParamsArray;
-        this.headers = other.headers;
-        this.body = other.body;
-        this.files = other.files;
-    }
-
-    public void setProtocolVersion(String protocolVersion) {
-        this.protocolVersion = protocolVersion;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public void setQueryParamsArray(Map<String, List<String>> queryParamsArray) {
-        this.queryParamsArray = queryParamsArray;
-    }
-
-    public void setPostParamsArray(Map<String, List<String>> postParamsArray) {
-        this.postParamsArray = postParamsArray;
-    }
-
-    public void setHeaders(Map<String, List<String>> headers) {
-        this.headers = headers;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-    }
-
-    public void setFiles(List<File> files) {
-        this.files = files;
+        this.httpRequestEntity = other.httpRequestEntity;
     }
 
     //SDK Methods
@@ -149,14 +59,14 @@ public class HttpRequest {
      * @return Return the HTTP method used for the request as an uppercase string.
      */
     public String getMethod() {
-        return method;
+        return httpRequestEntity.getMethod();
     }
 
     /**
      * @return Return the full URL provided for the request.
      */
     public String getUrl() {
-        return url;
+        return httpRequestEntity.getUrl();
     }
 
     /**
@@ -165,7 +75,7 @@ public class HttpRequest {
     @JsonIgnore
     public String getUrlScheme() {
         try {
-            return new URL(this.url).getProtocol();
+            return new URL(httpRequestEntity.getUrl()).getProtocol();
         } catch (MalformedURLException e) {
             Logger.log(e);
             return "";
@@ -178,7 +88,7 @@ public class HttpRequest {
     @JsonIgnore
     public String getUrlHost() {
         try {
-            return new URL(this.url).getHost();
+            return new URL(httpRequestEntity.getUrl()).getHost();
         } catch (MalformedURLException e) {
             Logger.log(e);
             return "";
@@ -191,7 +101,7 @@ public class HttpRequest {
     @JsonIgnore
     public String getUrlPath() {
         try {
-            return new URL(this.url).getPath();
+            return new URL(httpRequestEntity.getUrl()).getPath();
         } catch (MalformedURLException e) {
             Logger.log(e);
             return "";
@@ -205,7 +115,7 @@ public class HttpRequest {
      * @return Return true if the Http request has a queryParamsArray param that matches the name specified in the parameter
      */
     public boolean hasQueryParam(String name) {
-        return this.queryParamsArray.containsKey(name);
+        return httpRequestEntity.getQueryParamsArray().containsKey(name);
     }
 
     /**
@@ -221,8 +131,12 @@ public class HttpRequest {
      * @return Return the value of the param or the default value if the param doesn't exist.
      */
     public String getQueryParam(String name, String defaultValue) {
-        List<String> values = this.queryParamsArray.get(name);
+        List<String> values = httpRequestEntity.getQueryParamsArray().get(name);
         return values == null || values.isEmpty() ? defaultValue == null ? "" : defaultValue : values.get(0);
+    }
+
+    public String getQueryParam(String name) {
+        return getQueryParam(name, "");
     }
 
     /**
@@ -240,8 +154,12 @@ public class HttpRequest {
      * default array will be returned, if no default is specified an empty array will be returned
      */
     public List<String> getQueryParamArray(String name, List<String> defaultArray) {
-        List<String> values = this.queryParamsArray.get(name);
+        List<String> values = httpRequestEntity.getQueryParamsArray().get(name);
         return values != null && !values.isEmpty() ? values : defaultArray != null ? defaultArray : new ArrayList<>();
+    }
+
+    public List<String> getQueryParamArray(String name) {
+        return getQueryParamArray(name, new ArrayList<>());
     }
 
     /**
@@ -252,8 +170,8 @@ public class HttpRequest {
     public Map<String, String> getQueryParams() {
         Map<String, String> queryParams = new HashMap<>();
 
-        for (Map.Entry key : this.queryParamsArray.entrySet()) {
-            queryParams.put((String) key.getKey(), this.queryParamsArray.get((String) key.getKey()).get(0));
+        for (Map.Entry key : httpRequestEntity.getQueryParamsArray().entrySet()) {
+            queryParams.put((String) key.getKey(), httpRequestEntity.getQueryParamsArray().get((String) key.getKey()).get(0));
         }
 
         return queryParams;
@@ -264,7 +182,7 @@ public class HttpRequest {
      * name, and the value an array with the parameter value(s), each as a string.
      */
     public Map<String, List<String>> getQueryParamsArray() {
-        return queryParamsArray;
+        return httpRequestEntity.getQueryParamsArray();
     }
 
     /**
@@ -275,7 +193,7 @@ public class HttpRequest {
      * @return Return true if the post param exist in the http request
      */
     public boolean hasPostParam(String name) {
-        return this.postParamsArray.containsKey(name);
+        return httpRequestEntity.getPostParamsArray().containsKey(name);
     }
 
     /**
@@ -289,7 +207,7 @@ public class HttpRequest {
      */
     @JsonIgnore
     public String getPostParam(String name, String defaultValue) {
-        List<String> values = this.postParamsArray.get(name);
+        List<String> values = httpRequestEntity.getPostParamsArray().get(name);
         return values == null || values.isEmpty() ? defaultValue == null ? "" : defaultValue : values.get(0);
     }
 
@@ -309,7 +227,7 @@ public class HttpRequest {
      */
     @JsonIgnore
     public List<String> getPostParamArray(String name, List<String> defaultArray) {
-        List<String> values = this.postParamsArray.get(name);
+        List<String> values = httpRequestEntity.getPostParamsArray().get(name);
         return values != null && !values.isEmpty() ? values : defaultArray != null ? defaultArray : new ArrayList<>();
     }
 
@@ -321,8 +239,8 @@ public class HttpRequest {
     public Map<String, String> getPostParams() {
         Map<String, String> postParams = new HashMap<>();
 
-        for (Map.Entry key : this.postParamsArray.entrySet()) {
-            postParams.put((String) key.getKey(), this.postParamsArray.get((String) key.getKey()).get(0));
+        for (Map.Entry key : httpRequestEntity.getPostParamsArray().entrySet()) {
+            postParams.put((String) key.getKey(), httpRequestEntity.getPostParamsArray().get((String) key.getKey()).get(0));
         }
 
         return postParams;
@@ -334,7 +252,7 @@ public class HttpRequest {
      * parameter name, and the value an array with the parameter value(s), each as a string.
      */
     public Map<String, List<String>> getPostParamsArray() {
-        return this.postParamsArray;
+        return httpRequestEntity.getPostParamsArray();
     }
 
     /**
@@ -344,14 +262,14 @@ public class HttpRequest {
      * @return Return true if the protocolVersion of the http request is the same protocolVersion as the one specified in the parameters
      */
     public boolean isProtocolVersion(String version) {
-        return this.protocolVersion.equals(version);
+        return httpRequestEntity.getProtocolVersion().equals(version);
     }
 
     /**
      * @return Return the value of the HTTP protocol protocolVersion specified by the request.
      */
     public String getProtocolVersion() {
-        return protocolVersion;
+        return httpRequestEntity.getProtocolVersion();
     }
 
     /**
@@ -361,7 +279,7 @@ public class HttpRequest {
      * @return Return true if the http request has the header specified in the parameter
      */
     public boolean hasHeader(String name) {
-        return this.headers.containsKey(name);
+        return httpRequestEntity.getHeaders().containsKey(name);
     }
 
     /**
@@ -372,16 +290,33 @@ public class HttpRequest {
      * If a header with the specified name does not exist, and no default is provided, and empty string MUST be returned.
      */
     public String getHeader(String name, String defaultValue) {
-        List<String> values = this.headers.get(name);
+        List<String> values = httpRequestEntity.getHeaders().get(name);
         return values == null || values.isEmpty() ? defaultValue == null ? "" : defaultValue : values.get(0);
     }
 
+    public String getHeader(String name) {
+        return getHeader(name, "");
+    }
+
     /**
-     * @return Return an object with the HTTP headers provided in the request, where each property name is the header
-     * name, and the value the header value as a string.
+     * @return return an object with the HTTP headers provided in the request, where each property name is the header name, and the value the header value as a string. If more than 1 value exists for an HTTP header it MUST use the value of the first occurrence in the request.
      */
-    public Map<String, List<String>> getHeaders() { //TODO return the value of the headers as a string
+    public Map<String, String> getHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        for (Map.Entry key : httpRequestEntity.getHeaders().entrySet() ){
+            if (!httpRequestEntity.getHeaders().get((String)key.getKey()).isEmpty()) {
+                headers.put((String) key.getKey(), httpRequestEntity.getHeaders().get((String) key.getKey()).get(0));
+            }
+        }
         return headers;
+    }
+
+    /**
+     *
+     * @return return an object with the HTTP headers provided in the request, where each property name is the HTTP header name, and the value an array with the HTTP header value(s), each as a string.
+     */
+    public Map<String, List<String>> getHeadersArray() { //TODO return the value of the headers as a string
+        return httpRequestEntity.getHeaders();
     }
 
     /**
@@ -389,7 +324,7 @@ public class HttpRequest {
      * MUST be considered valid content.
      */
     public boolean hasBody() {
-        return this.body != null && !this.body.isEmpty();
+        return httpRequestEntity.getBody() != null && !httpRequestEntity.getBody().isEmpty();
     }
 
     /**
@@ -397,7 +332,7 @@ public class HttpRequest {
      * string MUST be returned.
      */
     public String getBody() {
-        return body;
+        return httpRequestEntity.getBody();
     }
 
     /**
@@ -406,7 +341,7 @@ public class HttpRequest {
      * uploaded in the request.
      */
     public boolean hasFile(String name) {
-        for (File file : this.files) {
+        for (File file : httpRequestEntity.getFiles()) {
             if (file.getFilename().equals(name)) {
                 return true;
             }
@@ -424,14 +359,14 @@ public class HttpRequest {
      * name as first argument and an empty path as second argument will be returned.
      */
     public File getFile(String name) {
-        for (File file : this.files) {
+        for (File file : httpRequestEntity.getFiles()) {
             if (file.getFilename().equals(name)) {
                 return file;
             }
         }
 
         File file = new File();
-        file.setFilename(name);
+        file.setName(name);
         return file;
     }
 
@@ -439,7 +374,24 @@ public class HttpRequest {
      * @return Return an array with the files uploaded in the request, where each MUST be a File object.
      */
     public List<File> getFiles() {
-        return files;
+        return httpRequestEntity.getFiles();
+    }
+
+    public static class Builder {
+
+        private HttpRequestEntity httpRequestEntity;
+
+        public Builder() {
+        }
+
+        public HttpRequest.Builder setHttpRequestEntity(HttpRequestEntity httpRequestEntity) {
+            this.httpRequestEntity = httpRequestEntity;
+            return this;
+        }
+
+        public HttpRequest build(){
+            return new HttpRequest(httpRequestEntity);
+        }
     }
 
     @Override
@@ -447,61 +399,24 @@ public class HttpRequest {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof HttpRequest)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         HttpRequest that = (HttpRequest) o;
 
-        if (getProtocolVersion() != null ? !getProtocolVersion().equals(that.getProtocolVersion()) : that.getProtocolVersion() != null) {
-            return false;
-        }
-        if (getMethod() != null ? !getMethod().equals(that.getMethod()) : that.getMethod() != null) {
-            return false;
-        }
-        if (getUrl() != null ? !getUrl().equals(that.getUrl()) : that.getUrl() != null) {
-            return false;
-        }
-        if (queryParamsArray != null ? !queryParamsArray.equals(that.queryParamsArray) : that.queryParamsArray != null) {
-            return false;
-        }
-        if (postParamsArray != null ? !postParamsArray.equals(that.postParamsArray) : that.postParamsArray != null) {
-            return false;
-        }
-        if (getHeaders() != null ? !getHeaders().equals(that.getHeaders()) : that.getHeaders() != null) {
-            return false;
-        }
-        if (getBody() != null ? !getBody().equals(that.getBody()) : that.getBody() != null) {
-            return false;
-        }
-        return getFiles() != null ? getFiles().equals(that.getFiles()) : that.getFiles() == null;
-
+        return httpRequestEntity != null ? httpRequestEntity.equals(that.httpRequestEntity) : that.httpRequestEntity == null;
     }
 
     @Override
     public int hashCode() {
-        int result = getProtocolVersion() != null ? getProtocolVersion().hashCode() : 0;
-        result = 31 * result + (getMethod() != null ? getMethod().hashCode() : 0);
-        result = 31 * result + (getUrl() != null ? getUrl().hashCode() : 0);
-        result = 31 * result + (queryParamsArray != null ? queryParamsArray.hashCode() : 0);
-        result = 31 * result + (postParamsArray != null ? postParamsArray.hashCode() : 0);
-        result = 31 * result + (getHeaders() != null ? getHeaders().hashCode() : 0);
-        result = 31 * result + (getBody() != null ? getBody().hashCode() : 0);
-        result = 31 * result + (getFiles() != null ? getFiles().hashCode() : 0);
-        return result;
+        return httpRequestEntity != null ? httpRequestEntity.hashCode() : 0;
     }
 
     @Override
     public String toString() {
         return "HttpRequest{" +
-                "protocolVersion='" + protocolVersion + '\'' +
-                ", method='" + method + '\'' +
-                ", url='" + url + '\'' +
-                ", queryParamsArray=" + queryParamsArray +
-                ", postParamsArray=" + postParamsArray +
-                ", headers=" + headers +
-                ", body='" + body + '\'' +
-                ", files=" + files +
+                "httpRequestEntity=" + httpRequestEntity +
                 '}';
     }
 }

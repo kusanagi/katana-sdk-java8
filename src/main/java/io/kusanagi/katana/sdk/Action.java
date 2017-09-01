@@ -15,20 +15,21 @@
 
 package io.kusanagi.katana.sdk;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.kusanagi.katana.api.Api;
 import io.kusanagi.katana.api.commands.CallCommandPayload;
+import io.kusanagi.katana.api.commands.Mapping;
 import io.kusanagi.katana.api.commands.common.CommandMeta;
+import io.kusanagi.katana.api.component.Component;
 import io.kusanagi.katana.api.component.Constants;
 import io.kusanagi.katana.api.component.ExceptionMessage;
-import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.api.component.Serializer;
 import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.api.component.utils.MessagePackSerializer;
 import io.kusanagi.katana.api.replies.ErrorPayload;
 import io.kusanagi.katana.api.replies.ReturnReplyPayload;
+import io.kusanagi.katana.api.serializers.ActionEntity;
+import io.kusanagi.katana.api.serializers.TransportEntity;
 import org.zeromq.ZMQ;
 
 import java.io.IOException;
@@ -41,27 +42,17 @@ import java.util.Map;
  * Created by juan on 27/08/16.
  */
 public class Action extends Api {
-    /**
-     * The parameters sent to the action, where each property name is the "name" of the parameter and the value an
-     * object, with a property named "v" (value) containing the value of the parameter, and "t" (type) with the data
-     * type of the parameter (object)
-     */
-    @JsonProperty(Key.ACTION_PARAMS)
-    private List<Param> params;
 
-    /**
-     * The Transport payload as sent from the Gateway or calling Service
-     */
-    @JsonProperty(Key.ACTION_TRANSPORT)
+    private ActionEntity actionEntity;
+
     private Transport transport;
 
-    /**
-     * The return object for a runtime call
-     */
-    @JsonProperty(Key.ACTION_RETURN_OBJECT)
-    private Object returnObject;
-
-    private String actionName;
+    public Action(Component component, String path, String name, String version, String platformVersion,
+                  Map<String, String> variables, boolean isDebug, Mapping mapping, ActionEntity actionEntity, Transport transport) {
+        super(component, path, name, version, platformVersion, variables, isDebug, mapping);
+        this.actionEntity = actionEntity;
+        this.transport = transport;
+    }
 
     /**
      * Default constructor
@@ -72,33 +63,16 @@ public class Action extends Api {
 
     public Action(Action other) {
         super(other);
-        this.params = other.params;
+        this.actionEntity = other.actionEntity;
         this.transport = other.transport;
-        this.actionName = other.actionName;
-    }
-
-    public void setActionName(String actionName) {
-        this.actionName = actionName;
-    }
-
-    public void setParams(List<Param> params) {
-        this.params = params;
     }
 
     public Transport getTransport() {
         return transport;
     }
 
-    public void setTransport(Transport transport) {
-        this.transport = transport;
-    }
-
-    public Object getReturnObject() {
-        return returnObject;
-    }
-
-    public void setReturnObject(Object returnObject) {
-        this.returnObject = returnObject;
+    public Object getReturnObject(){
+        return actionEntity.getReturnObject();
     }
 
     // SDK Methods
@@ -108,7 +82,6 @@ public class Action extends Api {
      *
      * @return Return true if the Service is the initial Service called in a request
      */
-    @JsonIgnore
     public boolean isOrigin() {
         return this.transport.getOriginService().length != 0 && this.transport.getOriginService()[0].equals(getName());
     }
@@ -116,9 +89,8 @@ public class Action extends Api {
     /**
      * @return Return the unique name of the action called.
      */
-    @JsonIgnore
     public String getActionName() {
-        return this.actionName;
+        return actionEntity.getActionName();
     }
 
     /**
@@ -131,7 +103,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action setProperty(String name, String value) {
-        TransportMeta meta = this.transport.getMeta();
+        TransportMeta meta = actionEntity.getTransport().getMeta();
         Map<String, String> properties = meta.getProperties();
         properties.put(name, value);
         return this;
@@ -145,7 +117,7 @@ public class Action extends Api {
      * @return Return true if the Action has the param
      */
     public boolean hasParam(String name) {
-        for (Param param : params) {
+        for (Param param : actionEntity.getParams()) {
             if (param.getName().equals(name)) {
                 return true;
             }
@@ -160,9 +132,8 @@ public class Action extends Api {
      * @param name Name of the param
      * @return Return the value of the param
      */
-    @JsonIgnore
     public Param getParam(String name) {
-        for (Param param : params) {
+        for (Param param : actionEntity.getParams()) {
             if (param.getName().equals(name)) {
                 return param;
             }
@@ -180,7 +151,7 @@ public class Action extends Api {
      * @return Return all the params of the action
      */
     public List<Param> getParams() {
-        return params;
+        return actionEntity.getParams();
     }
 
     /**
@@ -203,6 +174,10 @@ public class Action extends Api {
         return param;
     }
 
+    public Param newParam(String name) {
+        return newParam(name, "", "");
+    }
+
     /**
      * Determine if a file with the parameter name specified by the REQUIRED case sensitive
      * name argument was provided for the action.
@@ -211,7 +186,7 @@ public class Action extends Api {
      * @return Return true if the action has the file
      */
     public boolean hasFile(String name) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = this.transport.getFiles();
+        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = actionEntity.getTransport().getFiles();
         for (Map.Entry path : pathFiles.entrySet()) {
             Map<String, Map<String, Map<String, Map<String, File>>>> serviceFiles = pathFiles.get((String) path.getKey());
             for (Map.Entry service : serviceFiles.entrySet()) {
@@ -238,9 +213,8 @@ public class Action extends Api {
      * @param name Name of the file
      * @return Return the File
      */
-    @JsonIgnore
     public File getFile(String name) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = this.transport.getFiles();
+        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = actionEntity.getTransport().getFiles();
         for (Map.Entry path : pathFiles.entrySet()) {
             Map<String, Map<String, Map<String, Map<String, File>>>> serviceFiles = pathFiles.get((String) path.getKey());
             for (Map.Entry service : serviceFiles.entrySet()) {
@@ -256,6 +230,7 @@ public class Action extends Api {
                 }
             }
         }
+
         File file = new File();
         file.setName(name);
         file.setPath("");
@@ -268,10 +243,9 @@ public class Action extends Api {
      *
      * @return Return all the files
      */
-    @JsonIgnore
     public List<File> getFiles() {
         List<File> files = new ArrayList<>();
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = this.transport.getFiles();
+        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = actionEntity.getTransport().getFiles();
         for (Map.Entry path : pathFiles.entrySet()) {
             Map<String, Map<String, Map<String, Map<String, File>>>> serviceFiles = pathFiles.get((String) path.getKey());
             for (Map.Entry service : serviceFiles.entrySet()) {
@@ -307,6 +281,9 @@ public class Action extends Api {
         file.setMime(mime);
         return file;
     }
+    public File newFile(String name, String path) {
+        return newFile(name, path, "");
+    }
 
     /**
      * Register a file to be downloaded by the Gateway to the client with the REQUIRED file argument, which MUST be an
@@ -323,7 +300,7 @@ public class Action extends Api {
         if (mapping != null && !getServiceSchema(getName(), getVersion()).hasFileServer()) {
             throw new IllegalArgumentException(String.format(ExceptionMessage.FILE_SERVER_NOT_CONFIGURED, getName(), getVersion()));
         }
-        this.transport.setBody(file);
+        actionEntity.getTransport().setBody(file);
         return this;
     }
 
@@ -336,11 +313,11 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action setEntity(Object entity) {
-        Map<String, Map<String, Map<String, Map<String, Object>>>> pathData = this.transport.getData();
+        Map<String, Map<String, Map<String, Map<String, Object>>>> pathData = actionEntity.getTransport().getData();
 
         if (pathData == null) {
             pathData = new HashMap<>();
-            this.transport.setData(pathData);
+            actionEntity.getTransport().setData(pathData);
         }
 
         Map<String, Map<String, Map<String, Object>>> serviceData = new HashMap<>();
@@ -399,7 +376,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action relateOne(String primaryKey, String service, String foreignKey) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations = this.transport.getRelations();
+        Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations = actionEntity.getTransport().getRelations();
 
         Map<String, Object> relation = new HashMap<>();
         relation.put(service, foreignKey);
@@ -445,7 +422,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action relateMany(String primaryKey, String service, List<String> foreignKey) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations = this.transport.getRelations();
+        Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations = actionEntity.getTransport().getRelations();
 
         Map<String, Object> relation = new HashMap<>();
         relation.put(service, foreignKey);
@@ -494,7 +471,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action relateOneRemote(String primaryKey, String address, String service, String foreignKey) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations = this.transport.getRelations();
+        Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations = actionEntity.getTransport().getRelations();
 
         Map<String, Object> relation = new HashMap<>();
         relation.put(service, foreignKey);
@@ -542,7 +519,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action relateManyRemote(String primaryKey, String address, String service, List<String> foreignKey) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations = this.transport.getRelations();
+        Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> relations = actionEntity.getTransport().getRelations();
 
         Map<String, Object> relation = new HashMap<>();
         relation.put(service, foreignKey);
@@ -585,7 +562,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action setLink(String link, String uri) {
-        Map<String, Map<String, Map<String, String>>> pathLink = this.transport.getLinks();
+        Map<String, Map<String, Map<String, String>>> pathLink = actionEntity.getTransport().getLinks();
         Map<String, Map<String, String>> serviceLink = new HashMap<>();
         Map<String, String> linkMap = new HashMap<>();
         if (pathLink.containsKey(getPath())) {
@@ -616,7 +593,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action commit(String action, List<Param> params) {
-        List<ServiceTransaction> commit = this.transport.getTransactions().getCommit();
+        List<ServiceTransaction> commit = actionEntity.getTransport().getTransactions().getCommit();
         if (commit == null) {
             commit = new ArrayList<>();
         }
@@ -642,7 +619,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action rollback(String action, List<Param> params) {
-        List<ServiceTransaction> rollback = this.transport.getTransactions().getRollback();
+        List<ServiceTransaction> rollback = actionEntity.getTransport().getTransactions().getRollback();
         if (rollback == null) {
             rollback = new ArrayList<>();
         }
@@ -668,7 +645,7 @@ public class Action extends Api {
      * @return Return the instance of the action
      */
     public Action complete(String action, List<Param> params) {
-        List<ServiceTransaction> complete = this.transport.getTransactions().getComplete();
+        List<ServiceTransaction> complete = actionEntity.getTransport().getTransactions().getComplete();
         if (complete == null) {
             complete = new ArrayList<>();
         }
@@ -697,8 +674,8 @@ public class Action extends Api {
     public Object call(String service, String version, String action, List<Param> params, List<File> files, int timeout) {
         ServiceSchema serviceSchema = getServiceSchema(this.name, this.version);
 
-        if (!serviceSchema.getActionSchema(this.actionName).hasCalls()) {
-            throw new IllegalArgumentException(String.format(ExceptionMessage.CALL_NOT_CONFIGURED, this.name, this.version, this.actionName));
+        if (!serviceSchema.getActionSchema(actionEntity.getActionName()).hasCalls()) {
+            throw new IllegalArgumentException(String.format(ExceptionMessage.CALL_NOT_CONFIGURED, this.name, this.version, actionEntity.getActionName()));
         }
 
         // Validate is there are local files
@@ -708,7 +685,7 @@ public class Action extends Api {
             }
             for (File file : files) {
                 if (file.isLocal()) {
-                    throw new IllegalArgumentException(String.format(ExceptionMessage.CANNOT_REFERENCE_LOCAL_FILE, this.name, this.version, this.actionName));
+                    throw new IllegalArgumentException(String.format(ExceptionMessage.CANNOT_REFERENCE_LOCAL_FILE, this.name, this.version, actionEntity.getActionName()));
                 }
             }
         }
@@ -717,7 +694,7 @@ public class Action extends Api {
         Callee callee = new Callee();
         callee.setAction(getActionName());
         callee.setCalleeInfo(new String[]{service, version, action});
-        callee.setTransport(getTransport());
+        callee.setTransport(actionEntity.getTransport());
         callee.setParam(params);
         callee.setFiles(files);
 
@@ -764,19 +741,19 @@ public class Action extends Api {
                 returnCommandReply = serializer.deserialize(bytes, ReturnReplyPayload.class);
 
 //                //Merge transports
-                Transport responseTransport = returnCommandReply.getCommandReply().getResult().getTransport();
-                merge(this.transport.getMeta().getFallback(), responseTransport.getMeta().getFallback());
-                merge(this.transport.getMeta().getProperties(), responseTransport.getMeta().getProperties());
-                merge(this.transport.getData(), responseTransport.getData());
-                merge(this.transport.getRelations(), responseTransport.getRelations());
-                merge(this.transport.getLinks(), responseTransport.getLinks());
-                merge(this.transport.getCalls(), responseTransport.getCalls());
-                merge(this.transport.getTransactions().getCommit(), responseTransport.getTransactions().getCommit());
-                merge(this.transport.getTransactions().getComplete(), responseTransport.getTransactions().getComplete());
-                merge(this.transport.getTransactions().getRollback(), responseTransport.getTransactions().getRollback());
-                merge(this.transport.getErrors(), responseTransport.getErrors());
-                this.transport.setBody(responseTransport.getBody());
-                merge(this.transport.getFiles(), responseTransport.getFiles());
+                TransportEntity responseTransport = returnCommandReply.getCommandReply().getResult().getTransport();
+                merge(actionEntity.getTransport().getMeta().getFallback(), responseTransport.getMeta().getFallback());
+                merge(actionEntity.getTransport().getMeta().getProperties(), responseTransport.getMeta().getProperties());
+                merge(actionEntity.getTransport().getData(), responseTransport.getData());
+                merge(actionEntity.getTransport().getRelations(), responseTransport.getRelations());
+                merge(actionEntity.getTransport().getLinks(), responseTransport.getLinks());
+                merge(actionEntity.getTransport().getCalls(), responseTransport.getCalls());
+                merge(actionEntity.getTransport().getTransactions().getCommit(), responseTransport.getTransactions().getCommit());
+                merge(actionEntity.getTransport().getTransactions().getComplete(), responseTransport.getTransactions().getComplete());
+                merge(actionEntity.getTransport().getTransactions().getRollback(), responseTransport.getTransactions().getRollback());
+                merge(actionEntity.getTransport().getErrors(), responseTransport.getErrors());
+                actionEntity.getTransport().setBody(responseTransport.getBody());
+                merge(actionEntity.getTransport().getFiles(), responseTransport.getFiles());
 
                 return returnCommandReply.getCommandReply().getResult().getReturnObject();
             } catch (IOException e) {
@@ -839,8 +816,8 @@ public class Action extends Api {
     public Action deferCall(String service, String version, String action, List<Param> params, List<File> files) {
         ServiceSchema serviceSchema = getServiceSchema(this.name, this.version);
 
-        if (mapping != null && !serviceSchema.getActionSchema(this.actionName).hasDeferCall(service, version, action)) {
-            throw new IllegalArgumentException(String.format(ExceptionMessage.DEFERRED_CALL_NOT_CONFIGURED, this.name, this.version, this.actionName));
+        if (mapping != null && !serviceSchema.getActionSchema(actionEntity.getActionName()).hasDeferCall(service, version, action)) {
+            throw new IllegalArgumentException(String.format(ExceptionMessage.DEFERRED_CALL_NOT_CONFIGURED, this.name, this.version, actionEntity.getActionName()));
         }
 
         if (files != null) {
@@ -855,18 +832,18 @@ public class Action extends Api {
             }
         }
 
-        Map<String, Map<String, List<Call>>> calls = transport.getCalls();
+        Map<String, Map<String, List<Call>>> calls = this.transport.getCalls();
 
         if (calls == null) {
             calls = new HashMap<>();
-            transport.setCalls(calls);
+            actionEntity.getTransport().setCalls(calls);
         }
 
         Call call = new Call();
         call.setName(service);
         call.setVersion(version);
         call.setAction(action);
-        call.setCaller(this.actionName);
+        call.setCaller(actionEntity.getActionName());
         call.setParams(params);
 
         List<Call> callList = new ArrayList<>();
@@ -903,11 +880,11 @@ public class Action extends Api {
      * @param timeout time to wait for the response
      * @return Return the instance of the action
      */
-    public Action callRemote(String address, String service, String version, String action, List<Param> params, List<File> files, int timeout) {
+    public Action remoteCall(String address, String service, String version, String action, List<Param> params, List<File> files, int timeout) {
         ServiceSchema serviceSchema = getServiceSchema(this.name, this.version);
 
-        if (mapping != null && !serviceSchema.getActionSchema(this.actionName).hasRemoteCalls()) {
-            throw new IllegalArgumentException(String.format(ExceptionMessage.REMOTE_CALL_NOT_CONFIGURED, address, this.name, this.version, this.actionName));
+        if (mapping != null && !serviceSchema.getActionSchema(actionEntity.getActionName()).hasRemoteCalls()) {
+            throw new IllegalArgumentException(String.format(ExceptionMessage.REMOTE_CALL_NOT_CONFIGURED, address, this.name, this.version, actionEntity.getActionName()));
         }
 
         if (files != null) {
@@ -943,7 +920,7 @@ public class Action extends Api {
         call.setName(service);
         call.setVersion(version);
         call.setAction(action);
-        call.setCaller(this.actionName);
+        call.setCaller(actionEntity.getActionName());
         call.setTimeout(timeout);
         call.setParams(params);
         callList.add(call);
@@ -972,7 +949,7 @@ public class Action extends Api {
         error.setCode(code);
         error.setStatus(status);
 
-        Map<String, Map<String, Map<String, List<Error>>>> pathError = this.transport.getErrors();
+        Map<String, Map<String, Map<String, List<Error>>>> pathError = actionEntity.getTransport().getErrors();
         Map<String, Map<String, List<Error>>> serviceError = new HashMap<>();
         Map<String, List<Error>> versionError = new HashMap<>();
         List<Error> errors = new ArrayList<>();
@@ -1015,18 +992,18 @@ public class Action extends Api {
             throw new IllegalArgumentException(String.format(ExceptionMessage.CANNOT_SET_A_RETURN_VALUE, getName(), getVersion(), getActionName()));
         }
 
-        this.returnObject = returnObject;
+        actionEntity.setReturnObject(returnObject);
         validateReturnObjectType(actionSchema.getReturnType());
 
     }
 
     private void validateReturnObjectType(String returnType) {
-        if ((returnType.equals(Constants.TYPE_BOOLEAN) && !(returnObject instanceof Boolean)) ||
-                (returnType.equals(Constants.TYPE_INTEGER) && !(returnObject instanceof Integer)) ||
-                (returnType.equals(Constants.TYPE_FLOAT) && !(returnObject instanceof Float)) ||
-                (returnType.equals(Constants.TYPE_STRING) && !(returnObject instanceof String)) ||
-                (returnType.equals(Constants.TYPE_ARRAY) && !(returnObject instanceof List)) ||
-                (returnType.equals(Constants.TYPE_OBJECT) && !(returnObject instanceof Map))) {
+        if ((returnType.equals(Constants.TYPE_BOOLEAN) && !(actionEntity.getReturnObject() instanceof Boolean)) ||
+                (returnType.equals(Constants.TYPE_INTEGER) && !(actionEntity.getReturnObject() instanceof Integer)) ||
+                (returnType.equals(Constants.TYPE_FLOAT) && !(actionEntity.getReturnObject() instanceof Float)) ||
+                (returnType.equals(Constants.TYPE_STRING) && !(actionEntity.getReturnObject() instanceof String)) ||
+                (returnType.equals(Constants.TYPE_ARRAY) && !(actionEntity.getReturnObject() instanceof List)) ||
+                (returnType.equals(Constants.TYPE_OBJECT) && !(actionEntity.getReturnObject() instanceof Map))) {
             throwInvalidTypeException();
         }
     }
@@ -1035,37 +1012,69 @@ public class Action extends Api {
         throw new IllegalArgumentException(String.format(ExceptionMessage.INVALID_RETURN_TYPE, getName(), getVersion(), getActionName()));
     }
 
+    public static class Builder extends Api.Builder<Action>{
+
+        private ActionEntity actionEntity;
+        private Transport transport;
+
+        public Builder() {
+        }
+
+        public Builder setActionEntity(ActionEntity actionEntity) {
+            this.actionEntity = actionEntity;
+            this.transport = new Transport.Builder().setTransportEntity(actionEntity.getTransport()).build();
+            return this;
+        }
+
+        public Action build(){
+            return new Action(
+                getComponent(),
+                getPath(),
+                getName(),
+                getVersion(),
+                getPlatformVersion(),
+                getVariables(),
+                isDebug(),
+                getMapping(),
+                actionEntity,
+                transport
+            );
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Action)) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
             return false;
         }
 
         Action action = (Action) o;
 
-        if (!getParams().equals(action.getParams())) {
+        if (actionEntity != null ? !actionEntity.equals(action.actionEntity) : action.actionEntity != null) {
             return false;
         }
-        return getTransport().equals(action.getTransport());
-
+        return transport != null ? transport.equals(action.transport) : action.transport == null;
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + getParams().hashCode();
-        result = 31 * result + getTransport().hashCode();
+        result = 31 * result + (actionEntity != null ? actionEntity.hashCode() : 0);
+        result = 31 * result + (transport != null ? transport.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "Action{" +
-                "params=" + params +
+                "actionEntity=" + actionEntity +
                 ", transport=" + transport +
-                "} " + super.toString();
+                '}';
     }
 }

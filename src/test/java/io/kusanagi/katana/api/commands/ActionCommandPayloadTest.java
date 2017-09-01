@@ -32,7 +32,7 @@ public class ActionCommandPayloadTest {
         MockFactory mockFactory = new MockFactory();
         ActionCommandPayload object = mockFactory.getActionCommandPayload();
         Assert.assertEquals(object, new ActionCommandPayload(object));
-        Assert.assertEquals(480891326, object.hashCode());
+        Assert.assertEquals(-2145097358, object.hashCode());
     }
 
 }

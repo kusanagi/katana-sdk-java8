@@ -161,6 +161,7 @@ public class ActionSchema {
         this.primaryKey = other.primaryKey;
         this.collection = other.collection;
         this.calls = other.calls;
+        this.deferredCalls = other.deferredCalls;
         this.remoteCalls = other.remoteCalls;
         this.fallbacks = other.fallbacks;
         this.deprecated = other.deprecated;
@@ -169,6 +170,7 @@ public class ActionSchema {
         this.files = other.files;
         this.entity = other.entity;
         this.relations = other.relations;
+        this.returnObject = other.returnObject;
     }
 
     public void setName(String name) {
@@ -600,6 +602,9 @@ public class ActionSchema {
         if (!Arrays.deepEquals(calls, that.calls)) {
             return false;
         }
+        if (!Arrays.deepEquals(deferredCalls, that.deferredCalls)) {
+            return false;
+        }
         if (!Arrays.deepEquals(remoteCalls, that.remoteCalls)) {
             return false;
         }
@@ -618,7 +623,10 @@ public class ActionSchema {
         if (entity != null ? !entity.equals(that.entity) : that.entity != null) {
             return false;
         }
-        return relations != null ? relations.equals(that.relations) : that.relations == null;
+        if (relations != null ? !relations.equals(that.relations) : that.relations != null) {
+            return false;
+        }
+        return returnObject != null ? returnObject.equals(that.returnObject) : that.returnObject == null;
     }
 
     @Override
@@ -630,6 +638,7 @@ public class ActionSchema {
         result = 31 * result + (primaryKey != null ? primaryKey.hashCode() : 0);
         result = 31 * result + (collection ? 1 : 0);
         result = 31 * result + Arrays.deepHashCode(calls);
+        result = 31 * result + Arrays.deepHashCode(deferredCalls);
         result = 31 * result + Arrays.deepHashCode(remoteCalls);
         result = 31 * result + (fallbacks != null ? fallbacks.hashCode() : 0);
         result = 31 * result + (deprecated ? 1 : 0);
@@ -638,6 +647,7 @@ public class ActionSchema {
         result = 31 * result + (files != null ? files.hashCode() : 0);
         result = 31 * result + (entity != null ? entity.hashCode() : 0);
         result = 31 * result + (relations != null ? relations.hashCode() : 0);
+        result = 31 * result + (returnObject != null ? returnObject.hashCode() : 0);
         return result;
     }
 
@@ -651,6 +661,7 @@ public class ActionSchema {
                 ", primaryKey='" + primaryKey + '\'' +
                 ", collection=" + collection +
                 ", calls=" + Arrays.toString(calls) +
+                ", deferredCalls=" + Arrays.toString(deferredCalls) +
                 ", remoteCalls=" + Arrays.toString(remoteCalls) +
                 ", fallbacks=" + fallbacks +
                 ", deprecated=" + deprecated +
@@ -659,6 +670,7 @@ public class ActionSchema {
                 ", files=" + files +
                 ", entity=" + entity +
                 ", relations=" + relations +
+                ", returnObject=" + returnObject +
                 '}';
     }
 }

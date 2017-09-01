@@ -33,7 +33,6 @@ import java.nio.file.Paths;
  */
 public class File {
 
-
     /**
      * File name
      */
@@ -94,10 +93,10 @@ public class File {
     public File(File other) {
         this.name = other.name;
         this.path = other.path;
-        this.token = other.token;
+        this.mime = other.mime;
         this.filename = other.filename;
         this.size = other.size;
-        this.mime = other.mime;
+        this.token = other.token;
         this.exists = other.exists;
     }
 
@@ -109,8 +108,8 @@ public class File {
         this.path = path;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setMime(String mime) {
+        this.mime = mime;
     }
 
     public void setFilename(String filename) {
@@ -121,8 +120,12 @@ public class File {
         this.size = size;
     }
 
-    public void setMime(String mime) {
-        this.mime = mime;
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public boolean isExists() {
+        return exists;
     }
 
     public void setExists(boolean exists) {
@@ -180,7 +183,7 @@ public class File {
      * @return true if a path is defined for the file.
      */
     public boolean exists() {
-        return this.exists;
+        return exists;
     }
 
     /**
@@ -207,10 +210,10 @@ public class File {
      */
     public String read() {
         try {
-            return new String(Files.readAllBytes(Paths.get(this.path)));
+            return new String(Files.readAllBytes(Paths.get(path)));
         } catch (IOException e) {
             Logger.log(e);
-            throw new IllegalArgumentException(String.format(ExceptionMessage.FILE_DOES_NOT_EXIST_IN_PATH, this.path));
+            throw new IllegalArgumentException(String.format(ExceptionMessage.FILE_DOES_NOT_EXIST_IN_PATH, path));
         }
     }
 
@@ -220,15 +223,7 @@ public class File {
      * MUST update the name to identify the file in the request with the given value of the REQUIRED name argument.
      */
     public File copyWithName(String name) {
-        File file = new File();
-        file.setName(name);
-        file.setFilename(this.filename);
-        file.setMime(this.mime);
-        file.setPath(this.path);
-        file.setSize(this.size);
-        file.setToken(this.token);
-        file.setExists(this.exists);
-        return file;
+        return new File(name, path, mime, filename, size, token, exists);
     }
 
     /**
@@ -237,15 +232,7 @@ public class File {
      * MUST update the MIME type of the file with the given value of the REQUIRED mime argument.
      */
     public File copyWithMime(String mime) {
-        File file = new File();
-        file.setName(this.name);
-        file.setFilename(this.filename);
-        file.setMime(mime);
-        file.setPath(this.path);
-        file.setSize(this.size);
-        file.setToken(this.token);
-        file.setExists(this.exists);
-        return file;
+        return new File(name, path, mime, filename, size, token, exists);
     }
 
     @Override
@@ -253,7 +240,7 @@ public class File {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof File)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
@@ -262,33 +249,32 @@ public class File {
         if (exists != file.exists) {
             return false;
         }
-        if (getName() != null ? !getName().equals(file.getName()) : file.getName() != null) {
+        if (name != null ? !name.equals(file.name) : file.name != null) {
             return false;
         }
-        if (getPath() != null ? !getPath().equals(file.getPath()) : file.getPath() != null) {
+        if (path != null ? !path.equals(file.path) : file.path != null) {
             return false;
         }
-        if (getToken() != null ? !getToken().equals(file.getToken()) : file.getToken() != null) {
+        if (mime != null ? !mime.equals(file.mime) : file.mime != null) {
             return false;
         }
-        if (getFilename() != null ? !getFilename().equals(file.getFilename()) : file.getFilename() != null) {
+        if (filename != null ? !filename.equals(file.filename) : file.filename != null) {
             return false;
         }
-        if (getSize() != null ? !getSize().equals(file.getSize()) : file.getSize() != null) {
+        if (size != null ? !size.equals(file.size) : file.size != null) {
             return false;
         }
-        return getMime() != null ? getMime().equals(file.getMime()) : file.getMime() == null;
-
+        return token != null ? token.equals(file.token) : file.token == null;
     }
 
     @Override
     public int hashCode() {
-        int result = getName() != null ? getName().hashCode() : 0;
-        result = 31 * result + (getPath() != null ? getPath().hashCode() : 0);
-        result = 31 * result + (getToken() != null ? getToken().hashCode() : 0);
-        result = 31 * result + (getFilename() != null ? getFilename().hashCode() : 0);
-        result = 31 * result + (getSize() != null ? getSize().hashCode() : 0);
-        result = 31 * result + (getMime() != null ? getMime().hashCode() : 0);
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (path != null ? path.hashCode() : 0);
+        result = 31 * result + (mime != null ? mime.hashCode() : 0);
+        result = 31 * result + (filename != null ? filename.hashCode() : 0);
+        result = 31 * result + (size != null ? size.hashCode() : 0);
+        result = 31 * result + (token != null ? token.hashCode() : 0);
         result = 31 * result + (exists ? 1 : 0);
         return result;
     }
@@ -298,10 +284,10 @@ public class File {
         return "File{" +
                 "name='" + name + '\'' +
                 ", path='" + path + '\'' +
-                ", token='" + token + '\'' +
+                ", mime='" + mime + '\'' +
                 ", filename='" + filename + '\'' +
                 ", size='" + size + '\'' +
-                ", mime='" + mime + '\'' +
+                ", token='" + token + '\'' +
                 ", exists=" + exists +
                 '}';
     }

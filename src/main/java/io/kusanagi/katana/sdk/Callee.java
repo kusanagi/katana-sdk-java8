@@ -18,6 +18,7 @@ package io.kusanagi.katana.sdk;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.Api;
 import io.kusanagi.katana.api.component.Key;
+import io.kusanagi.katana.api.serializers.TransportEntity;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +35,7 @@ public class Callee extends Api {
     private String[] calleeInfo;
 
     @JsonProperty(Key.CALLEE_TRANSPORT)
-    private Transport transport;
+    private TransportEntity transport;
 
     @JsonProperty(Key.CALLEE_PARAM)
     private List<Param> param;
@@ -70,11 +71,11 @@ public class Callee extends Api {
         this.calleeInfo = calleeInfo;
     }
 
-    public Transport getTransport() {
+    public TransportEntity getTransport() {
         return transport;
     }
 
-    public void setTransport(Transport transport) {
+    public void setTransport(TransportEntity transport) {
         this.transport = transport;
     }
 
