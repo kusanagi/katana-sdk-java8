@@ -244,10 +244,10 @@ public abstract class Api {
     /**
      *
      * @return This function is only for use in an asynchronous implementation of the SDK, for any other implementation
-     * it MUST return false.
+     * it MUST throw an exception.
      */
     public boolean done(){
-        return false;
+        throw new RuntimeException("SDK does not support async call to end action: Api.done()");
     }
 
     @Override
