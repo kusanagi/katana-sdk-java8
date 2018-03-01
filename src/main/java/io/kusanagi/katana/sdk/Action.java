@@ -695,7 +695,7 @@ public class Action extends Api {
         }
 
         // Build the payload
-        Callee callee = new Callee();
+        CalleeEntity callee = new CalleeEntity();
         callee.setAction(getActionName());
         callee.setCalleeInfo(new String[]{service, version, action});
         callee.setTransport(actionEntity.getTransport());
@@ -762,7 +762,7 @@ public class Action extends Api {
                 return returnCommandReply.getCommandReply().getResult().getReturnObject();
             } catch (IOException e) {
                 try {
-                    // Throw Error Payload as exception
+                    // Throw ErrorEntity Payload as exception
                     errorPayload = serializer.deserialize(bytes, ErrorPayload.class);
                     Logger.log(e);
                     throw new IllegalArgumentException(errorPayload.getError().getMessage());
@@ -840,23 +840,23 @@ public class Action extends Api {
             }
         }
 
-        Map<String, Map<String, List<Call>>> calls = this.transport.getCalls();
+        Map<String, Map<String, List<CallEntity>>> calls = this.transport.getTransportEntity().getCalls();
 
         if (calls == null) {
             calls = new HashMap<>();
             actionEntity.getTransport().setCalls(calls);
         }
 
-        Call call = new Call();
+        CallEntity call = new CallEntity();
         call.setName(service);
         call.setVersion(version);
         call.setAction(action);
         call.setCaller(actionEntity.getActionName());
         call.setParams(params);
 
-        List<Call> callList = new ArrayList<>();
+        List<CallEntity> callList = new ArrayList<>();
 
-        Map<String, List<Call>> versionCalls = new HashMap<>();
+        Map<String, List<CallEntity>> versionCalls = new HashMap<>();
         versionCalls.put(this.version, callList);
 
         if (calls.containsKey(this.name)) {
@@ -907,10 +907,10 @@ public class Action extends Api {
             }
         }
 
-        Map<String, Map<String, List<Call>>> calls = transport.getCalls();
-        List<Call> callList = new ArrayList<>();
+        Map<String, Map<String, List<CallEntity>>> calls = transport.getTransportEntity().getCalls();
+        List<CallEntity> callList = new ArrayList<>();
 
-        Map<String, List<Call>> versionCalls = new HashMap<>();
+        Map<String, List<CallEntity>> versionCalls = new HashMap<>();
         versionCalls.put(this.version, callList);
 
         if (calls.containsKey(this.name)) {
@@ -923,7 +923,7 @@ public class Action extends Api {
             calls.put(this.name, versionCalls);
         }
 
-        Call call = new Call();
+        CallEntity call = new CallEntity();
         call.setGateway(address);
         call.setName(service);
         call.setVersion(version);
@@ -950,21 +950,21 @@ public class Action extends Api {
      * If an error has already been registered for the given action it MUST be aggregated to the array of errors for
      * that action. The order of this registry is relevant.
      *
-     * @param message Error message
-     * @param code    Error code
-     * @param status  Error status
+     * @param message ErrorEntity message
+     * @param code    ErrorEntity code
+     * @param status  ErrorEntity status
      * @return Return the instance of the action
      */
     public Action error(String message, int code, String status) {
-        Error error = new Error();
+        ErrorEntity error = new ErrorEntity();
         error.setMessage(message);
         error.setCode(code);
         error.setStatus(status);
 
-        Map<String, Map<String, Map<String, List<Error>>>> pathError = actionEntity.getTransport().getErrors();
-        Map<String, Map<String, List<Error>>> serviceError = new HashMap<>();
-        Map<String, List<Error>> versionError = new HashMap<>();
-        List<Error> errors = new ArrayList<>();
+        Map<String, Map<String, Map<String, List<ErrorEntity>>>> pathError = actionEntity.getTransport().getErrors();
+        Map<String, Map<String, List<ErrorEntity>>> serviceError = new HashMap<>();
+        Map<String, List<ErrorEntity>> versionError = new HashMap<>();
+        List<ErrorEntity> errors = new ArrayList<>();
 
         if (pathError.containsKey(getPath())) {
             serviceError = pathError.get(getPath());

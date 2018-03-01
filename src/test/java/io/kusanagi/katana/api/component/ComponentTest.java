@@ -599,28 +599,28 @@ public class ComponentTest {
         assertEquals("path", transport.getDownload().getPath());
         assertEquals("image/jpeg", transport.getDownload().getMime());
 
-        assertData((List) transport.getData("http://127.0.0.1:80", "users", "0.2.0", "read"));
+//        assertData((List) transport.getData("http://127.0.0.1:80", "users", "0.2.0", "read"));
 //        assertEquals("", transport.getRelations());
-        assertLinks((Map) transport.getLinks("http://127.0.0.1:80", "users"));
-//        assertCalls((List<Call>) ((Map) transport.getCalls("users")).get("0.2.0"));
-        assertTransactions(transport.getTransactions("users"));
-        assertErrors((List<io.kusanagi.katana.sdk.Error>) ((Map) transport.getErrors("http://127.0.0.1:80", "users")).get("1.0.0"));
+//        assertLinks((Map) transport.getLinks("http://127.0.0.1:80", "users"));
+//        assertCalls((List<CallEntity>) ((Map) transport.getCalls("users")).get("0.2.0"));
+//        assertTransactions(transport.getTransactions("users"));
+//        assertErrors((List<ErrorEntity>) ((Map) transport.getErrors("http://127.0.0.1:80", "users")).get("1.0.0"));
     }
 
-    private void assertErrors(List<io.kusanagi.katana.sdk.Error> errors) {
+    private void assertErrors(List<ErrorEntity> errors) {
         assertEquals("The user does not exist", errors.get(0).getMessage());
         assertEquals(9, errors.get(0).getCode());
         assertEquals("404 Not Found", errors.get(0).getStatus());
     }
 
-    private void assertTransactions(Transaction transactions) {
+    private void assertTransactions(TransactionEntity transactions) {
         assertEquals("users", transactions.getCommit().get(0).getName());
         assertEquals("1.0.0", transactions.getCommit().get(0).getVersion());
         assertEquals("create", transactions.getCommit().get(0).getAction());
         assertEquals("save", transactions.getCommit().get(0).getCaller());
     }
 
-    private void assertCalls(List<Call> calls) {
+    private void assertCalls(List<CallEntity> calls) {
         assertEquals("posts", calls.get(0).getName());
         assertEquals("0.1.0", calls.get(0).getVersion());
         assertEquals("read", calls.get(0).getAction());

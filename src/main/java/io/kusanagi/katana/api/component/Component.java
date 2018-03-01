@@ -26,7 +26,7 @@ import io.kusanagi.katana.api.replies.ErrorPayload;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
 import io.kusanagi.katana.sdk.ActionSchema;
 import io.kusanagi.katana.sdk.Callable;
-import io.kusanagi.katana.sdk.Error;
+import io.kusanagi.katana.sdk.ErrorEntity;
 import io.kusanagi.katana.sdk.ServiceSchema;
 import org.zeromq.ZMQ;
 
@@ -417,7 +417,7 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
     protected abstract void runErrorCallback();
 
     private static ErrorPayload getErrorPayload(Exception e) {
-        Error error = new Error();
+        ErrorEntity error = new ErrorEntity();
         error.setMessage(e.getMessage());
         error.setCode(1);
         error.setStatus(Constants.INTERNAL_SERVER_ERROR_STATUS);

@@ -18,12 +18,12 @@ package io.kusanagi.katana.api.commands;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.commands.common.CommandPayload;
 import io.kusanagi.katana.api.component.Key;
-import io.kusanagi.katana.sdk.Callee;
+import io.kusanagi.katana.sdk.CalleeEntity;
 
 /**
  * Created by jega on 3/03/17.
  */
-public class CallCommandPayload extends CommandPayload<Callee> {
+public class CallCommandPayload extends CommandPayload<CalleeEntity> {
 
     /**
      * The semantics of the command
@@ -80,13 +80,13 @@ public class CallCommandPayload extends CommandPayload<Callee> {
                 '}';
     }
 
-    public static class CallCommand extends CommandPayload.Command<Callee> {
+    public static class CallCommand extends CommandPayload.Command<CalleeEntity> {
 
         /**
          * The key/value arguments for the command, if no arguments exist this property SHOULD NOT be defined
          */
         @JsonProperty(Key.COMMAND_ARGUMENT)
-        private Callee argument;
+        private CalleeEntity argument;
 
         public CallCommand() {
             //Empty constructor for serialization
@@ -94,15 +94,15 @@ public class CallCommandPayload extends CommandPayload<Callee> {
 
         public CallCommand(CallCommandPayload.CallCommand other) {
             super(other);
-            this.argument = new Callee(other.argument);
+            this.argument = new CalleeEntity(other.argument);
         }
 
         @Override
-        public Callee getArgument() {
+        public CalleeEntity getArgument() {
             return argument;
         }
 
-        public void setArgument(Callee argument) {
+        public void setArgument(CalleeEntity argument) {
             this.argument = argument;
         }
 

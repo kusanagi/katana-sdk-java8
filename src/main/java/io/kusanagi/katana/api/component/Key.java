@@ -97,7 +97,7 @@ public class Key {
     public static final String ACTION_SCHEMA_RETURN_OBJECT = "rv";
     public static final String ACTION_SCHEMA_TAGS = "t";
 
-    //Call
+    //CallEntity
     public static final String CALL_DURATION = "D";
     public static final String CALL_NAME = "n";
     public static final String CALL_VERSION = "v";
@@ -107,7 +107,7 @@ public class Key {
     public static final String CALL_TIMEOUT = "x";
     public static final String CALL_PARAMS = "p";
 
-    //Callee
+    //CalleeEntity
     public static final String CALLEE_ACTION = "action";
     public static final String CALLEE_CALLEE_INFO = "callee";
     public static final String CALLEE_TRANSPORT = "transport";
@@ -121,7 +121,7 @@ public class Key {
     public static final String ENTITY_SCHEMA_VALIDATE = "V";
     public static final String ENTITY_SCHEMA_PRIMARY = "k";
 
-    //Error
+    //ErrorEntity
     public static final String ERROR_MESSAGE = "m";
     public static final String ERROR_CODE = "c";
     public static final String ERROR_STATUS = "s";
@@ -202,7 +202,7 @@ public class Key {
     public static final String REQUEST_HTTP_REQUEST = "r";
     public static final String REQUEST_REQUEST_CALL = "c";
 
-    //Request Call
+    //Request CallEntity
     public static final String REQUEST_CALL_SERVICE = "s";
     public static final String REQUEST_CALL_VERSION = "v";
     public static final String REQUEST_CALL_ACTION = "a";
@@ -225,14 +225,14 @@ public class Key {
     public static final String SERVICE_SCHEMA_HTTP_SCHEMA = "h";
     public static final String SERVICE_SCHEMA_ACTION_SCHEMAS = "ac";
 
-    //Service Transaction
+    //Service TransactionEntity
     public static final String SERVICE_TRANSACTION_NAME = "n";
     public static final String SERVICE_TRANSACTION_VERSION = "v";
     public static final String SERVICE_TRANSACTION_ACTION = "a";
     public static final String SERVICE_TRANSACTION_CALLER = "c";
     public static final String SERVICE_TRANSACTION_PARAMS = "p";
 
-    //Transaction
+    //TransactionEntity
     public static final String TRANSACTION_COMMIT = "c";
     public static final String TRANSACTION_ROLLBACK = "r";
     public static final String TRANSACTION_COMPLETE = "C";
