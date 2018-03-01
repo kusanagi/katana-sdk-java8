@@ -51,7 +51,7 @@ public class TransportEntity implements CommandReplyResult {
      * this property SHOULD NOT be defined
      */
     @JsonProperty(Key.TRANSPORT_FILES)
-    private Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> files;
+    private Map<String, Map<String, Map<String, Map<String, List<File>>>>> files;
 
     /**
      * The data stored by each Service for the response, if no data exists this property SHOULD NOT be defined
@@ -113,11 +113,11 @@ public class TransportEntity implements CommandReplyResult {
         this.body = body;
     }
 
-    public Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> getFiles() {
+    public Map<String, Map<String, Map<String, Map<String, List<File>>>>> getFiles() {
         return files;
     }
 
-    public void setFiles(Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> files) {
+    public void setFiles(Map<String, Map<String, Map<String, Map<String, List<File>>>>> files) {
         this.files = files;
     }
 

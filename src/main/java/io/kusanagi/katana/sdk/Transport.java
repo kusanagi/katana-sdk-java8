@@ -51,7 +51,7 @@ public class Transport implements CommandReplyResult {
         return transportEntity.getBody();
     }
 
-    public Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> getFilesEntity() {
+    public Map<String, Map<String, Map<String, Map<String, List<File>>>>> getFilesEntity() {
         return transportEntity.getFiles();
     }
 
@@ -309,11 +309,11 @@ public class Transport implements CommandReplyResult {
     }
 
     public void addFile(String path, String service, String version, String action, File file) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFile = transportEntity.getFiles();
-        Map<String, Map<String, Map<String, Map<String, File>>>> serviceFile = new HashMap<>();
-        Map<String, Map<String, Map<String, File>>> versionFile = new HashMap<>();
-        Map<String, Map<String, File>> actionFile = new HashMap<>();
-        Map<String, File> nameFile = new HashMap<>();
+        Map<String, Map<String, Map<String, Map<String, List<File>>>>> pathFile = transportEntity.getFiles();
+        Map<String, Map<String, Map<String, List<File>>>> serviceFile = new HashMap<>();
+        Map<String, Map<String, List<File>>> versionFile = new HashMap<>();
+        Map<String, List<File>> actionFile = new HashMap<>();
+        List<File> nameFile = new ArrayList<>();
 
         if (pathFile.containsKey(path)) {
             serviceFile = pathFile.get(path);
@@ -342,7 +342,7 @@ public class Transport implements CommandReplyResult {
             pathFile.put(path, serviceFile);
         }
 
-        nameFile.put(file.getName(), file);
+        nameFile.add(file);
     }
 
     public static class Builder{

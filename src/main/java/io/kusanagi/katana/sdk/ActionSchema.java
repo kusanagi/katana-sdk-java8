@@ -31,7 +31,7 @@ public class ActionSchema {
 
     /**
      * Defines the number of milliseconds the action is permitted to execute for before considering a timeout by the
-     * component making the request, defaults to 1000 milliseconds if not defined
+     * component making the request, defaults to 10000 milliseconds if not defined
      */
     @JsonProperty(Key.ACTION_SCHEMA_TIMEOUT)
     private int timeout;
@@ -134,13 +134,19 @@ public class ActionSchema {
     private List<RelationSchema> relations;
 
     /**
+     * Defines the action tags as an array, where each item is a string containing the tag name (array)
+     */
+    @JsonProperty(Key.ACTION_SCHEMA_TAGS)
+    private List<String> tags;
+
+    /**
      * The return value schema, not present if not defined
      */
     @JsonProperty(Key.ACTION_SCHEMA_RETURN_OBJECT)
     private ReturnSchema returnObject;
 
     public ActionSchema() {
-        timeout = 1000;
+        timeout = 10000;
         pathDelimiter = "/";
         primaryKey = "id";
         collection = false;
@@ -152,6 +158,7 @@ public class ActionSchema {
         calls = new String[0][0];
         deferredCalls = new String[0][0];
         remoteCalls = new String[0][0];
+        tags = new ArrayList<>();
     }
 
     public ActionSchema(ActionSchema other) {
@@ -171,6 +178,7 @@ public class ActionSchema {
         this.entity = other.entity;
         this.relations = other.relations;
         this.returnObject = other.returnObject;
+        this.tags = other.tags;
     }
 
     public void setName(String name) {
@@ -251,6 +259,10 @@ public class ActionSchema {
 
     public void setRelations(List<RelationSchema> relations) {
         this.relations = relations;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
     //SDM Methods
@@ -560,6 +572,29 @@ public class ActionSchema {
     }
 
     /**
+     * determine if tag exists for the REQUIRED case sensitive name argument.
+     * @param name Tag name
+     * @return if tag exists returns true else returns false
+     */
+    public boolean hasTag(String name) {
+        for (String tag: tags){
+            if(tag.equals(name)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @return an array with the tags defined for the action, in which each item is the tag name, in the order in which
+     * they are defined in the configuration file, or an empty array if no tags were defined.
+     */
+    public List<String> getTags() {
+        return this.tags;
+    }
+
+    /**
      * @return an instance of the HttpActionSchema class for the action using the stored mapping of schemas.
      */
     @JsonIgnore
@@ -626,6 +661,9 @@ public class ActionSchema {
         if (relations != null ? !relations.equals(that.relations) : that.relations != null) {
             return false;
         }
+        if (tags != null ? !tags.equals(that.tags) : that.tags != null) {
+            return false;
+        }
         return returnObject != null ? returnObject.equals(that.returnObject) : that.returnObject == null;
     }
 
@@ -647,6 +685,7 @@ public class ActionSchema {
         result = 31 * result + (files != null ? files.hashCode() : 0);
         result = 31 * result + (entity != null ? entity.hashCode() : 0);
         result = 31 * result + (relations != null ? relations.hashCode() : 0);
+        result = 31 * result + (tags != null ? tags.hashCode() : 0);
         result = 31 * result + (returnObject != null ? returnObject.hashCode() : 0);
         return result;
     }
@@ -670,6 +709,7 @@ public class ActionSchema {
                 ", files=" + files +
                 ", entity=" + entity +
                 ", relations=" + relations +
+                ", tags=" + tags +
                 ", returnObject=" + returnObject +
                 '}';
     }

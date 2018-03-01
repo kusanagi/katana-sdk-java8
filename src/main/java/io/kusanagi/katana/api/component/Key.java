@@ -96,6 +96,7 @@ public class Key {
     public static final String ACTION_SCHEMA_ENTITY = "E";
     public static final String ACTION_SCHEMA_RELATIONS = "r";
     public static final String ACTION_SCHEMA_RETURN_OBJECT = "rv";
+    public static final String ACTION_SCHEMA_TAGS = "t";
 
     //Call
     public static final String CALL_DURATION = "D";
@@ -130,6 +131,7 @@ public class Key {
     public static final String FIELD_SCHEMA_OPTIONAL = "o";
 
     //File
+    public static final String FILE_NAME = "n";
     public static final String FILE_PATH = "p";
     public static final String FILE_MIME = "m";
     public static final String FILE_FILENAME = "f";

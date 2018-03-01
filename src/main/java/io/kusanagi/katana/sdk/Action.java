@@ -186,17 +186,19 @@ public class Action extends Api {
      * @return Return true if the action has the file
      */
     public boolean hasFile(String name) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = actionEntity.getTransport().getFiles();
+        Map<String, Map<String, Map<String, Map<String, List<File>>>>> pathFiles = actionEntity.getTransport().getFiles();
         for (Map.Entry path : pathFiles.entrySet()) {
-            Map<String, Map<String, Map<String, Map<String, File>>>> serviceFiles = pathFiles.get((String) path.getKey());
+            Map<String, Map<String, Map<String, List<File>>>> serviceFiles = pathFiles.get((String) path.getKey());
             for (Map.Entry service : serviceFiles.entrySet()) {
-                Map<String, Map<String, Map<String, File>>> versionFiles = serviceFiles.get((String) service.getKey());
+                Map<String, Map<String, List<File>>> versionFiles = serviceFiles.get((String) service.getKey());
                 for (Map.Entry version : versionFiles.entrySet()) {
-                    Map<String, Map<String, File>> actionFiles = versionFiles.get((String) version.getKey());
+                    Map<String, List<File>> actionFiles = versionFiles.get((String) version.getKey());
                     for (Map.Entry action : actionFiles.entrySet()) {
-                        Map<String, File> nameFiles = actionFiles.get((String) action.getKey());
-                        if (nameFiles.containsKey(name)) {
-                            return true;
+                        List<File> nameFiles = actionFiles.get((String) action.getKey());
+                        for (File file: nameFiles) {
+                            if(file.getFilename().equals(name)) {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -214,17 +216,19 @@ public class Action extends Api {
      * @return Return the File
      */
     public File getFile(String name) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = actionEntity.getTransport().getFiles();
+        Map<String, Map<String, Map<String, Map<String, List<File>>>>> pathFiles = actionEntity.getTransport().getFiles();
         for (Map.Entry path : pathFiles.entrySet()) {
-            Map<String, Map<String, Map<String, Map<String, File>>>> serviceFiles = pathFiles.get((String) path.getKey());
+            Map<String, Map<String, Map<String, List<File>>>> serviceFiles = pathFiles.get((String) path.getKey());
             for (Map.Entry service : serviceFiles.entrySet()) {
-                Map<String, Map<String, Map<String, File>>> versionFiles = serviceFiles.get((String) service.getKey());
+                Map<String, Map<String, List<File>>> versionFiles = serviceFiles.get((String) service.getKey());
                 for (Map.Entry version : versionFiles.entrySet()) {
-                    Map<String, Map<String, File>> actionFiles = versionFiles.get((String) version.getKey());
+                    Map<String, List<File>> actionFiles = versionFiles.get((String) version.getKey());
                     for (Map.Entry action : actionFiles.entrySet()) {
-                        Map<String, File> nameFiles = actionFiles.get((String) action.getKey());
-                        if (nameFiles.containsKey(name)) {
-                            return nameFiles.get(name);
+                        List<File> nameFiles = actionFiles.get((String) action.getKey());
+                        for (File file: nameFiles) {
+                            if(file.getFilename().equals(name)) {
+                                return file;
+                            }
                         }
                     }
                 }
@@ -245,17 +249,17 @@ public class Action extends Api {
      */
     public List<File> getFiles() {
         List<File> files = new ArrayList<>();
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = actionEntity.getTransport().getFiles();
+        Map<String, Map<String, Map<String, Map<String, List<File>>>>> pathFiles = actionEntity.getTransport().getFiles();
         for (Map.Entry path : pathFiles.entrySet()) {
-            Map<String, Map<String, Map<String, Map<String, File>>>> serviceFiles = pathFiles.get((String) path.getKey());
+            Map<String, Map<String, Map<String, List<File>>>> serviceFiles = pathFiles.get((String) path.getKey());
             for (Map.Entry service : serviceFiles.entrySet()) {
-                Map<String, Map<String, Map<String, File>>> versionFiles = serviceFiles.get((String) service.getKey());
+                Map<String, Map<String, List<File>>> versionFiles = serviceFiles.get((String) service.getKey());
                 for (Map.Entry version : versionFiles.entrySet()) {
-                    Map<String, Map<String, File>> actionFiles = versionFiles.get((String) version.getKey());
+                    Map<String, List<File>> actionFiles = versionFiles.get((String) version.getKey());
                     for (Map.Entry action : actionFiles.entrySet()) {
-                        Map<String, File> nameFiles = actionFiles.get((String) action.getKey());
-                        for (Map.Entry name : nameFiles.entrySet()) {
-                            files.add(nameFiles.get((String) name.getKey()));
+                        List<File> nameFiles = actionFiles.get((String) action.getKey());
+                        for (File file: nameFiles) {
+                            files.add(file);
                         }
                     }
                 }
@@ -801,6 +805,10 @@ public class Action extends Api {
         }
     }
 
+    public Object call(String service, String version, String action, List<Param> params, List<File> files) {
+        return call(service, version, action, params, files, 10000);
+    }
+
     /**
      * Register a Service call with the REQUIRED service argument as the name of the Service to call, the REQUIRED
      * version argument as the version of the given Service, and the REQUIRED action argument as the name of the action
@@ -925,6 +933,10 @@ public class Action extends Api {
         call.setParams(params);
         callList.add(call);
         return this;
+    }
+
+    public Action remoteCall(String address, String service, String version, String action, List<Param> params, List<File> files) {
+        return remoteCall(address, service, version, action, params, files, 10000);
     }
 
     /**
