@@ -24,10 +24,14 @@ import java.util.Date;
  */
 public class Logger {
 
-    public static final int INFO = 1;
-    public static final int WARNING = 2;
+    public static final int EMERGENCY = 0;
+    public static final int ALERT = 1;
+    public static final int CRITICAL = 2;
     public static final int ERROR = 3;
-    public static final int DEBUG = 4;
+    public static final int WARNING = 4;
+    public static final int NOTICE = 5;
+    public static final int INFO = 6;
+    public static final int DEBUG = 7;
 
     public static final String STANDARD_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     public static final String LOG_PATTERN = "%s %s (%s) [%s] [SDK] %s";
@@ -102,14 +106,22 @@ public class Logger {
 
     private static String getType(int type) {
         switch (type) {
-            case WARNING:
-                return "WARNING";
+            case EMERGENCY:
+                return "EMERGENCY";
+            case ALERT:
+                return "ALERT";
+            case CRITICAL:
+                return "CRITICAL";
             case ERROR:
                 return "ERROR";
-            case DEBUG:
-                return "DEBUG";
-            default:
+            case WARNING:
+                return "WARNING";
+            case NOTICE:
+                return "NOTICE";
+            case INFO:
                 return "INFO";
+            default:
+                return "DEBUG";
         }
     }
 

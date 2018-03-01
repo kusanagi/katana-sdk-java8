@@ -153,7 +153,7 @@ public class ComponentTest {
         assertEquals("0.1.0", component.getFrameworkVersion());
         assertEquals(PORT, component.getTcp());
         assertEquals(true, component.isDebug());
-        assertEquals(true, component.isQuiet());
+        assertEquals(7, component.getLogLevel());
         assertEquals("list", component.getAction());
         assertEquals("socket", component.getSocket());
         assertEquals(3, component.getVar().size());
