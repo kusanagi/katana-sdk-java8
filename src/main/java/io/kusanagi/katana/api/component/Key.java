@@ -104,7 +104,7 @@ public class Key {
     public static final String CALL_ACTION = "a";
     public static final String CALL_CALLER = "C";
     public static final String CALL_GATEWAY = "g";
-    public static final String CALL_TIMEOUT = "t";
+    public static final String CALL_TIMEOUT = "x";
     public static final String CALL_PARAMS = "p";
 
     //Callee
