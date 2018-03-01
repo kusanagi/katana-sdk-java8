@@ -128,6 +128,10 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
             generateDefaultSocket();
         }
 
+        Logger.setComponent(this.getComponent());
+        Logger.setComponentName(this.getName());
+        Logger.setVersion(this.getVersion());
+        Logger.setFrameworkVersion(this.getFrameworkVersion());
         if (isDebug() && !this.quiet) {
             Logger.activate();
         } else {

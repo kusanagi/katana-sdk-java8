@@ -30,11 +30,15 @@ public class Logger {
     public static final int DEBUG = 4;
 
     public static final String STANDARD_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-    public static final String LOG_PATTERN = "%s [%s] [SDK] %s";
+    public static final String LOG_PATTERN = "%s %s (%s) [%s] [SDK] %s";
 
     private static boolean isActive;
 
     private static String id;
+    private static String component;
+    private static String componentName;
+    private static String version;
+    private static String frameworkVersion;
 
     private Logger() {
         // private constructor to block the instantiation of this object
@@ -50,6 +54,22 @@ public class Logger {
 
     public static void setId(String id) {
         Logger.id = id;
+    }
+
+    public static void setComponent(String component) {
+        Logger.component = component;
+    }
+
+    public static void setComponentName(String componentName) {
+        Logger.componentName = componentName;
+    }
+
+    public static void setVersion(String version) {
+        Logger.version = version;
+    }
+
+    public static void setFrameworkVersion(String frameworkVersion) {
+        Logger.frameworkVersion = frameworkVersion;
     }
 
     public static void log(int type, String message) {
@@ -71,7 +91,13 @@ public class Logger {
         Date date = Calendar.getInstance().getTime();
 
         String time = standardDateFormat.format(date);
-        return String.format(LOG_PATTERN, time, getType(type), message + (id == null ? "" : " |" + id + "|"));
+        return String.format(LOG_PATTERN,
+                time,
+                component + " " +componentName+"/"+version,
+                frameworkVersion,
+                getType(type),
+                message + (id == null ? "" : " |" + id + "|")
+        );
     }
 
     private static String getType(int type) {
