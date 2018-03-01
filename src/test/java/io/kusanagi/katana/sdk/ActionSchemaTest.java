@@ -36,7 +36,6 @@ public class ActionSchemaTest {
     public void defaultValues() {
         Assert.assertEquals(1000, actionSchema.getTimeout());
         Assert.assertEquals("/", actionSchema.getPathDelimiter());
-        Assert.assertEquals("id", actionSchema.getPrimaryKey());
         Assert.assertFalse(actionSchema.isCollection());
         Assert.assertFalse(actionSchema.isDeprecated());
     }

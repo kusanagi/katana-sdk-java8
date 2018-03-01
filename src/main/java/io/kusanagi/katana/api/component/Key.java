@@ -83,7 +83,6 @@ public class Key {
     public static final String ACTION_SCHEMA_TIMEOUT = "x";
     public static final String ACTION_SCHEMA_ENTITY_PATH = "e";
     public static final String ACTION_SCHEMA_PATH_DELIMITER = "d";
-    public static final String ACTION_SCHEMA_PRIMARY = "k";
     public static final String ACTION_SCHEMA_COLLECTION = "c";
     public static final String ACTION_SCHEMA_CALLS = "C";
     public static final String ACTION_SCHEMA_DEFERRED_CALLS = "dc";
@@ -120,6 +119,7 @@ public class Key {
     public static final String ENTITY_SCHEMA_FIELDS = "F";
     public static final String ENTITY_SCHEMA_NAME = "n";
     public static final String ENTITY_SCHEMA_VALIDATE = "V";
+    public static final String ENTITY_SCHEMA_PRIMARY = "k";
 
     //Error
     public static final String ERROR_MESSAGE = "m";

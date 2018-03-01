@@ -51,17 +51,26 @@ public class EntitySchema {
     @JsonProperty(Key.ENTITY_SCHEMA_VALIDATE)
     private boolean validate;
 
+    /**
+     * Defines the name of the property in the entity object which defines the primary key for the entity, defaults to
+     * "id" if not defined
+     */
+    @JsonProperty(Key.ENTITY_SCHEMA_PRIMARY)
+    private String primaryKey;
+
     public EntitySchema() {
         field = new ArrayList<>();
         fields = new ArrayList<>();
         name = "";
         validate = false;
+        primaryKey = "id";
     }
 
     public EntitySchema(EntitySchema other) {
         this.field = other.field;
         this.fields = other.fields;
         this.validate = other.validate;
+        this.primaryKey = other.primaryKey;
     }
 
     public List<FieldSchema> getField() {
@@ -96,6 +105,14 @@ public class EntitySchema {
         this.validate = validate;
     }
 
+    public String getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(String primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -116,7 +133,10 @@ public class EntitySchema {
         if (fields != null ? !fields.equals(that.fields) : that.fields != null) {
             return false;
         }
-        return name != null ? name.equals(that.name) : that.name == null;
+        if (name != null ? !name.equals(that.name) : that.name != null) {
+            return false;
+        }
+        return primaryKey != null ? primaryKey.equals(that.primaryKey) : that.primaryKey == null;
     }
 
     @Override
@@ -125,6 +145,7 @@ public class EntitySchema {
         result = 31 * result + (fields != null ? fields.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (validate ? 1 : 0);
+        result = 31 * result + (primaryKey != null ? primaryKey.hashCode() : 0);
         return result;
     }
 
@@ -135,6 +156,7 @@ public class EntitySchema {
                 ", fields=" + fields +
                 ", name='" + name + '\'' +
                 ", validate=" + validate +
+                ", primaryKey='" + primaryKey + '\'' +
                 '}';
     }
 }

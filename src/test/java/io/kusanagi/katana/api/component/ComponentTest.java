@@ -481,7 +481,6 @@ public class ComponentTest {
         assertEquals("read", actionSchema.getName());
         assertEquals("entity:data", actionSchema.getEntityPath());
         assertEquals(":", actionSchema.getPathDelimiter());
-        assertEquals("uid", actionSchema.getPrimaryKey());
 //        assertEquals("404 Not Found", actionSchema.resolveEntity());
         assertEquals(true, actionSchema.hasEntity());
         assertEquals(true, actionSchema.hasRelations());

@@ -52,13 +52,6 @@ public class ActionSchema {
     private String pathDelimiter;
 
     /**
-     * Defines the name of the property in the entity object which defines the primary key for the entity, defaults to
-     * "id" if not defined
-     */
-    @JsonProperty(Key.ACTION_SCHEMA_PRIMARY)
-    private String primaryKey;
-
-    /**
      * Determines if the action returns a collection of entities instead of a single entity object, defaults to false if
      * not defined
      */
@@ -148,7 +141,6 @@ public class ActionSchema {
     public ActionSchema() {
         timeout = 10000;
         pathDelimiter = "/";
-        primaryKey = "id";
         collection = false;
         deprecated = false;
         files = new HashMap<>();
@@ -165,7 +157,6 @@ public class ActionSchema {
         this.timeout = other.timeout;
         this.entityPath = other.entityPath;
         this.pathDelimiter = other.pathDelimiter;
-        this.primaryKey = other.primaryKey;
         this.collection = other.collection;
         this.calls = other.calls;
         this.deferredCalls = other.deferredCalls;
@@ -199,10 +190,6 @@ public class ActionSchema {
 
     public void setPathDelimiter(String pathDelimiter) {
         this.pathDelimiter = pathDelimiter;
-    }
-
-    public void setPrimaryKey(String primaryKey) {
-        this.primaryKey = primaryKey;
     }
 
     public void setCollection(boolean collection) {
@@ -306,13 +293,6 @@ public class ActionSchema {
      */
     public String getPathDelimiter() {
         return pathDelimiter;
-    }
-
-    /**
-     * @return the name of the property in the entity which contains the primary key, or "id" if not defined.
-     */
-    public String getPrimaryKey() {
-        return primaryKey;
     }
 
     /**
@@ -631,9 +611,6 @@ public class ActionSchema {
         if (pathDelimiter != null ? !pathDelimiter.equals(that.pathDelimiter) : that.pathDelimiter != null) {
             return false;
         }
-        if (primaryKey != null ? !primaryKey.equals(that.primaryKey) : that.primaryKey != null) {
-            return false;
-        }
         if (!Arrays.deepEquals(calls, that.calls)) {
             return false;
         }
@@ -673,7 +650,6 @@ public class ActionSchema {
         result = 31 * result + timeout;
         result = 31 * result + (entityPath != null ? entityPath.hashCode() : 0);
         result = 31 * result + (pathDelimiter != null ? pathDelimiter.hashCode() : 0);
-        result = 31 * result + (primaryKey != null ? primaryKey.hashCode() : 0);
         result = 31 * result + (collection ? 1 : 0);
         result = 31 * result + Arrays.deepHashCode(calls);
         result = 31 * result + Arrays.deepHashCode(deferredCalls);
@@ -697,7 +673,6 @@ public class ActionSchema {
                 ", timeout=" + timeout +
                 ", entityPath='" + entityPath + '\'' +
                 ", pathDelimiter='" + pathDelimiter + '\'' +
-                ", primaryKey='" + primaryKey + '\'' +
                 ", collection=" + collection +
                 ", calls=" + Arrays.toString(calls) +
                 ", deferredCalls=" + Arrays.toString(deferredCalls) +
