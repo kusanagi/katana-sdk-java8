@@ -118,6 +118,7 @@ public class Key {
     //Entity Schema
     public static final String ENTITY_SCHEMA_FIELD = "f";
     public static final String ENTITY_SCHEMA_FIELDS = "F";
+    public static final String ENTITY_SCHEMA_NAME = "n";
     public static final String ENTITY_SCHEMA_VALIDATE = "V";
 
     //Error
