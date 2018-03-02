@@ -1,5 +1,5 @@
 /*
- * Java 7 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Java 8 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
  * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
  *
  * Distributed under the MIT license
@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  *  file that was distributed with this source code
  *
- * @link      https://github.com/kusanagi/katana-sdk-java7
+ * @link      https://github.com/kusanagi/katana-sdk-java8
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
  *
@@ -44,9 +44,9 @@ public class EntitySchemaTest {
         MockFactory mockFactory = new MockFactory();
         EntitySchema object = mockFactory.getEntitySchema();
         Assert.assertEquals(object, new EntitySchema(object));
-        Assert.assertEquals(2003584586, object.hashCode());
+        Assert.assertEquals(1299440963, object.hashCode());
         Assert.assertEquals(
-                "EntitySchema{field=[FieldSchema{name='id', type='integer', optional='false'}, FieldSchema{name='name', type='string', optional='false'}, FieldSchema{name='active', type='boolean', optional='false'}, FieldSchema{name='is_admin', type='boolean', optional='true'}], fields=[ObjectFieldSchema{name='contact', optional=false, field=[FieldSchema{name='id', type='integer', optional='false'}, FieldSchema{name='email', type='null', optional='false'}, FieldSchema{name='location', type='object', optional='false'}], fields=[]}], validate=true}",
+                "EntitySchema{field=[FieldSchema{name='id', type='integer', optional='false'}, FieldSchema{name='name', type='string', optional='false'}, FieldSchema{name='active', type='boolean', optional='false'}, FieldSchema{name='is_admin', type='boolean', optional='true'}], fields=[ObjectFieldSchema{name='contact', optional=false, field=[FieldSchema{name='id', type='integer', optional='false'}, FieldSchema{name='email', type='null', optional='false'}, FieldSchema{name='location', type='object', optional='false'}], fields=[]}], name='', validate=true, primaryKey='id'}",
                 object.toString());
     }
 

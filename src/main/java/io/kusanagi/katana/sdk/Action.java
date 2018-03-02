@@ -28,8 +28,7 @@ import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.api.component.utils.MessagePackSerializer;
 import io.kusanagi.katana.api.replies.ErrorPayload;
 import io.kusanagi.katana.api.replies.ReturnReplyPayload;
-import io.kusanagi.katana.api.serializers.ActionEntity;
-import io.kusanagi.katana.api.serializers.TransportEntity;
+import io.kusanagi.katana.api.serializers.*;
 import org.zeromq.ZMQ;
 
 import java.io.IOException;
@@ -196,7 +195,7 @@ public class Action extends Api {
                     for (Map.Entry action : actionFiles.entrySet()) {
                         List<File> nameFiles = actionFiles.get((String) action.getKey());
                         for (File file: nameFiles) {
-                            if(file.getFilename().equals(name)) {
+                            if(file.getName().equals(name)) {
                                 return true;
                             }
                         }
@@ -226,7 +225,7 @@ public class Action extends Api {
                     for (Map.Entry action : actionFiles.entrySet()) {
                         List<File> nameFiles = actionFiles.get((String) action.getKey());
                         for (File file: nameFiles) {
-                            if(file.getFilename().equals(name)) {
+                            if(file.getName().equals(name)) {
                                 return file;
                             }
                         }

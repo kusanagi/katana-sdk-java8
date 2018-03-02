@@ -17,7 +17,7 @@ package io.kusanagi.katana.api.replies;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Key;
-import io.kusanagi.katana.sdk.ErrorEntity;
+import io.kusanagi.katana.api.serializers.ErrorEntity;
 
 /**
  * Created by juan on 26/09/16.

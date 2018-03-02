@@ -1,5 +1,5 @@
 /*
- * Java 7 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Java 8 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
  * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
  *
  * Distributed under the MIT license
@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  *  file that was distributed with this source code
  *
- * @link      https://github.com/kusanagi/katana-sdk-java7
+ * @link      https://github.com/kusanagi/katana-sdk-java8
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
  *
@@ -48,7 +48,7 @@ public class TransportSchemaTest {
         Assert.assertEquals(object, new TransportSchema(object));
         Assert.assertEquals(-296674616, object.hashCode());
         Assert.assertEquals(
-                "TransportSchema{properties={foo=123}, data=[{id=ValueSchema{type='integer', value=321, items=null}, name=ValueSchema{type='string', value=James, items=null}, status=ValueSchema{type='null', value=null, items=null}, info=ValueSchema{type='array', value=[{v=Hello World}], items=null}, stats=ValueSchema{type='object', value={count={t=integer, v=12345}}, items=null}}], relations=[[1, user, 5], [1, comments, [3, 8]]], links={self=/1.0.0/posts}, errors=[[Unable to process posts, 0, 560 Logic ErrorEntity]]}",
+                "TransportSchema{properties={foo=123}, data=[{id=ValueSchema{type='integer', value=321, items=null}, name=ValueSchema{type='string', value=James, items=null}, status=ValueSchema{type='null', value=null, items=null}, info=ValueSchema{type='array', value=[{v=Hello World}], items=null}, stats=ValueSchema{type='object', value={count={t=integer, v=12345}}, items=null}}], relations=[[1, user, 5], [1, comments, [3, 8]]], links={self=/1.0.0/posts}, errors=[[Unable to process posts, 0, 560 Logic Error]]}",
                 object.toString());
     }
 

@@ -23,6 +23,8 @@ import io.kusanagi.katana.api.commands.common.CommandMeta;
 import io.kusanagi.katana.api.component.Serializer;
 import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.api.component.utils.MessagePackSerializer;
+import io.kusanagi.katana.api.serializers.CallEntity;
+import io.kusanagi.katana.api.serializers.TransactionEntity;
 import io.kusanagi.katana.sdk.*;
 
 import java.io.IOException;

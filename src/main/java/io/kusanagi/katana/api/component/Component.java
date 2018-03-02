@@ -26,7 +26,7 @@ import io.kusanagi.katana.api.replies.ErrorPayload;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
 import io.kusanagi.katana.sdk.ActionSchema;
 import io.kusanagi.katana.sdk.Callable;
-import io.kusanagi.katana.sdk.ErrorEntity;
+import io.kusanagi.katana.api.serializers.ErrorEntity;
 import io.kusanagi.katana.sdk.ServiceSchema;
 import org.zeromq.ZMQ;
 

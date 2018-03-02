@@ -1,5 +1,5 @@
 /*
- * Java 7 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Java 8 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
  * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
  *
  * Distributed under the MIT license
@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  *  file that was distributed with this source code
  *
- * @link      https://github.com/kusanagi/katana-sdk-java7
+ * @link      https://github.com/kusanagi/katana-sdk-java8
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
  *
@@ -54,9 +54,9 @@ public class LoggerTest {
 
     private String getMessage(String[] split) {
         String message = "";
-        if (split.length >= 4) {
-            for (int j = 3; j < split.length; j++) {
-                if (j == 3) {
+        if (split.length >= 7) {
+            for (int j = 6; j < split.length; j++) {
+                if (j == 6) {
                     message = split[j];
                 } else {
                     message += " " + split[j];
@@ -69,7 +69,7 @@ public class LoggerTest {
     private void assertCommonValues(String[] split, String message) throws ParseException {
         Date date = STANDARD_DATE_FORMAT.parse(split[0]);
         assertEquals(date.getTime(), Calendar.getInstance().getTimeInMillis(), 1000);
-        assertEquals("[SDK]", split[2]);
+        assertEquals("[SDK]", split[5]);
         assertEquals(message, getMessage(split));
     }
 
@@ -80,7 +80,7 @@ public class LoggerTest {
         String[] errors = outContent.toString().split("\n");
         String[] split = errors[0].split(" ");
 
-        assertEquals("[DEBUG]", split[1]);
+        assertEquals("[DEBUG]", split[4]);
         assertCommonValues(split, "message");
     }
 
@@ -91,7 +91,7 @@ public class LoggerTest {
         String[] errors = outContent.toString().split("\n");
         String[] split = errors[0].split(" ");
 
-        assertEquals("[INFO]", split[1]);
+        assertEquals("[INFO]", split[4]);
         assertCommonValues(split, "message");
     }
 
@@ -102,7 +102,7 @@ public class LoggerTest {
         String[] errors = outContent.toString().split("\n");
         String[] split = errors[0].split(" ");
 
-        assertEquals("[WARNING]", split[1]);
+        assertEquals("[WARNING]", split[4]);
         assertCommonValues(split, "message");
     }
 
@@ -113,7 +113,7 @@ public class LoggerTest {
         String[] errors = outContent.toString().split("\n");
         String[] split = errors[0].split(" ");
 
-        assertEquals("[ERROR]", split[1]);
+        assertEquals("[ERROR]", split[4]);
         assertCommonValues(split, "message");
     }
 
@@ -125,13 +125,13 @@ public class LoggerTest {
 
         String[] errors = outContent.toString().split("\n");
         String[] split = errors[0].split(" ");
-        assertEquals("[ERROR]", split[1]);
+        assertEquals("[ERROR]", split[4]);
         assertCommonValues(split, "message");
 
         StackTraceElement[] stackTrace = e.getStackTrace();
         for (int i = 1; i <= stackTrace.length; i++) {
             split = errors[i].split(" ");
-            assertEquals("[ERROR]", split[1]);
+            assertEquals("[ERROR]", split[4]);
             assertCommonValues(split, stackTrace[i - 1].toString());
         }
     }

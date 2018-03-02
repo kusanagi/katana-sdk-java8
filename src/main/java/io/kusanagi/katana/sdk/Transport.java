@@ -17,6 +17,8 @@ package io.kusanagi.katana.sdk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
+import io.kusanagi.katana.api.serializers.CallEntity;
+import io.kusanagi.katana.api.serializers.ErrorEntity;
 import io.kusanagi.katana.api.serializers.TransportEntity;
 
 import java.lang.reflect.Array;

@@ -1,5 +1,5 @@
 /*
- * Java 7 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
+ * Java 8 SDK for the KATANA(tm) Platform (http://katana.kusanagi.io)
  * Copyright (c) 2016-2017 KUSANAGI S.L. All rights reserved.
  *
  * Distributed under the MIT license
@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  *  file that was distributed with this source code
  *
- * @link      https://github.com/kusanagi/katana-sdk-java7
+ * @link      https://github.com/kusanagi/katana-sdk-java8
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  * @copyright Copyright (c) 2016-2017 KUSANAGI S.L. (http://kusanagi.io)
  *
@@ -15,6 +15,7 @@
 
 package io.kusanagi.katana.sdk;
 
+import io.kusanagi.katana.api.serializers.ErrorEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +36,7 @@ public class ErrorTest {
     public void defaultValues() {
         Assert.assertEquals("Unknown error", error.getMessage());
         Assert.assertEquals(0, error.getCode());
-        Assert.assertEquals("500 Internal Server ErrorEntity", error.getStatus());
+        Assert.assertEquals("500 Internal Server Error", error.getStatus());
     }
 
     @Test
@@ -44,7 +45,7 @@ public class ErrorTest {
         Assert.assertEquals(error, new ErrorEntity(error));
         Assert.assertEquals(-1348468619, error.hashCode());
         Assert.assertEquals(
-                "ErrorEntity{message='Unknown error', code='0', status='500 Internal Server ErrorEntity'}",
+                "ErrorEntity{message='Unknown error', code='0', status='500 Internal Server Error'}",
                 error.toString());
     }
 

@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
 import io.kusanagi.katana.sdk.*;
-import io.kusanagi.katana.sdk.ErrorEntity;
 
 import java.util.HashMap;
 import java.util.List;

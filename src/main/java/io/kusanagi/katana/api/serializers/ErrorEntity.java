@@ -13,7 +13,7 @@
  *
  */
 
-package io.kusanagi.katana.sdk;
+package io.kusanagi.katana.api.serializers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Constants;

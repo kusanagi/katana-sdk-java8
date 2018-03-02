@@ -15,6 +15,7 @@
 
 package io.kusanagi.katana.sdk;
 
+import io.kusanagi.katana.api.serializers.CallEntity;
 import io.kusanagi.katana.utils.MockFactory;
 import org.junit.Assert;
 import org.junit.Test;
