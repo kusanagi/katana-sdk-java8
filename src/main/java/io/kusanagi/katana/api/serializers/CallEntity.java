@@ -13,11 +13,12 @@
  *
  */
 
-package io.kusanagi.katana.sdk;
+package io.kusanagi.katana.api.serializers;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Key;
+import io.kusanagi.katana.sdk.Param;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ import java.util.List;
  * Created by juan on 18/11/16.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Call {
+public class CallEntity {
 
     /**
      * The duration of the **Service** call in milliseconds, which is **0** until the call is processed
@@ -75,11 +76,11 @@ public class Call {
     @JsonProperty(Key.CALL_TIMEOUT)
     private int timeout;
 
-    public Call() {
+    public CallEntity() {
         // Default constructor to make possible the serialization of this object.
     }
 
-    public Call(Call other) {
+    public CallEntity(CallEntity other) {
         this.name = other.name;
         this.version = other.version;
         this.action = other.action;
@@ -161,7 +162,7 @@ public class Call {
             return false;
         }
 
-        Call call = (Call) o;
+        CallEntity call = (CallEntity) o;
 
         if (duration != call.duration) {
             return false;
@@ -202,7 +203,7 @@ public class Call {
 
     @Override
     public String toString() {
-        return "Call{" +
+        return "CallEntity{" +
                 "duration=" + duration +
                 ", name='" + name + '\'' +
                 ", version='" + version + '\'' +

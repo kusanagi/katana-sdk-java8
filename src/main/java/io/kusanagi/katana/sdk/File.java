@@ -36,6 +36,7 @@ public class File {
     /**
      * File name
      */
+    @JsonProperty(Key.FILE_NAME)
     private String name;
 
     /**

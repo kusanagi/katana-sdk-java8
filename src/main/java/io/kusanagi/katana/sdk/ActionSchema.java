@@ -31,7 +31,7 @@ public class ActionSchema {
 
     /**
      * Defines the number of milliseconds the action is permitted to execute for before considering a timeout by the
-     * component making the request, defaults to 1000 milliseconds if not defined
+     * component making the request, defaults to 10000 milliseconds if not defined
      */
     @JsonProperty(Key.ACTION_SCHEMA_TIMEOUT)
     private int timeout;
@@ -50,13 +50,6 @@ public class ActionSchema {
      */
     @JsonProperty(Key.ACTION_SCHEMA_PATH_DELIMITER)
     private String pathDelimiter;
-
-    /**
-     * Defines the name of the property in the entity object which defines the primary key for the entity, defaults to
-     * "id" if not defined
-     */
-    @JsonProperty(Key.ACTION_SCHEMA_PRIMARY)
-    private String primaryKey;
 
     /**
      * Determines if the action returns a collection of entities instead of a single entity object, defaults to false if
@@ -134,15 +127,20 @@ public class ActionSchema {
     private List<RelationSchema> relations;
 
     /**
+     * Defines the action tags as an array, where each item is a string containing the tag name (array)
+     */
+    @JsonProperty(Key.ACTION_SCHEMA_TAGS)
+    private List<String> tags;
+
+    /**
      * The return value schema, not present if not defined
      */
     @JsonProperty(Key.ACTION_SCHEMA_RETURN_OBJECT)
     private ReturnSchema returnObject;
 
     public ActionSchema() {
-        timeout = 1000;
+        timeout = 10000;
         pathDelimiter = "/";
-        primaryKey = "id";
         collection = false;
         deprecated = false;
         files = new HashMap<>();
@@ -152,13 +150,13 @@ public class ActionSchema {
         calls = new String[0][0];
         deferredCalls = new String[0][0];
         remoteCalls = new String[0][0];
+        tags = new ArrayList<>();
     }
 
     public ActionSchema(ActionSchema other) {
         this.timeout = other.timeout;
         this.entityPath = other.entityPath;
         this.pathDelimiter = other.pathDelimiter;
-        this.primaryKey = other.primaryKey;
         this.collection = other.collection;
         this.calls = other.calls;
         this.deferredCalls = other.deferredCalls;
@@ -171,6 +169,7 @@ public class ActionSchema {
         this.entity = other.entity;
         this.relations = other.relations;
         this.returnObject = other.returnObject;
+        this.tags = other.tags;
     }
 
     public void setName(String name) {
@@ -191,10 +190,6 @@ public class ActionSchema {
 
     public void setPathDelimiter(String pathDelimiter) {
         this.pathDelimiter = pathDelimiter;
-    }
-
-    public void setPrimaryKey(String primaryKey) {
-        this.primaryKey = primaryKey;
     }
 
     public void setCollection(boolean collection) {
@@ -253,6 +248,10 @@ public class ActionSchema {
         this.relations = relations;
     }
 
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
     //SDM Methods
 
     /**
@@ -294,13 +293,6 @@ public class ActionSchema {
      */
     public String getPathDelimiter() {
         return pathDelimiter;
-    }
-
-    /**
-     * @return the name of the property in the entity which contains the primary key, or "id" if not defined.
-     */
-    public String getPrimaryKey() {
-        return primaryKey;
     }
 
     /**
@@ -560,6 +552,29 @@ public class ActionSchema {
     }
 
     /**
+     * determine if tag exists for the REQUIRED case sensitive name argument.
+     * @param name Tag name
+     * @return if tag exists returns true else returns false
+     */
+    public boolean hasTag(String name) {
+        for (String tag: tags){
+            if(tag.equals(name)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @return an array with the tags defined for the action, in which each item is the tag name, in the order in which
+     * they are defined in the configuration file, or an empty array if no tags were defined.
+     */
+    public List<String> getTags() {
+        return this.tags;
+    }
+
+    /**
      * @return an instance of the HttpActionSchema class for the action using the stored mapping of schemas.
      */
     @JsonIgnore
@@ -596,9 +611,6 @@ public class ActionSchema {
         if (pathDelimiter != null ? !pathDelimiter.equals(that.pathDelimiter) : that.pathDelimiter != null) {
             return false;
         }
-        if (primaryKey != null ? !primaryKey.equals(that.primaryKey) : that.primaryKey != null) {
-            return false;
-        }
         if (!Arrays.deepEquals(calls, that.calls)) {
             return false;
         }
@@ -626,6 +638,9 @@ public class ActionSchema {
         if (relations != null ? !relations.equals(that.relations) : that.relations != null) {
             return false;
         }
+        if (tags != null ? !tags.equals(that.tags) : that.tags != null) {
+            return false;
+        }
         return returnObject != null ? returnObject.equals(that.returnObject) : that.returnObject == null;
     }
 
@@ -635,7 +650,6 @@ public class ActionSchema {
         result = 31 * result + timeout;
         result = 31 * result + (entityPath != null ? entityPath.hashCode() : 0);
         result = 31 * result + (pathDelimiter != null ? pathDelimiter.hashCode() : 0);
-        result = 31 * result + (primaryKey != null ? primaryKey.hashCode() : 0);
         result = 31 * result + (collection ? 1 : 0);
         result = 31 * result + Arrays.deepHashCode(calls);
         result = 31 * result + Arrays.deepHashCode(deferredCalls);
@@ -647,6 +661,7 @@ public class ActionSchema {
         result = 31 * result + (files != null ? files.hashCode() : 0);
         result = 31 * result + (entity != null ? entity.hashCode() : 0);
         result = 31 * result + (relations != null ? relations.hashCode() : 0);
+        result = 31 * result + (tags != null ? tags.hashCode() : 0);
         result = 31 * result + (returnObject != null ? returnObject.hashCode() : 0);
         return result;
     }
@@ -658,7 +673,6 @@ public class ActionSchema {
                 ", timeout=" + timeout +
                 ", entityPath='" + entityPath + '\'' +
                 ", pathDelimiter='" + pathDelimiter + '\'' +
-                ", primaryKey='" + primaryKey + '\'' +
                 ", collection=" + collection +
                 ", calls=" + Arrays.toString(calls) +
                 ", deferredCalls=" + Arrays.toString(deferredCalls) +
@@ -670,6 +684,7 @@ public class ActionSchema {
                 ", files=" + files +
                 ", entity=" + entity +
                 ", relations=" + relations +
+                ", tags=" + tags +
                 ", returnObject=" + returnObject +
                 '}';
     }

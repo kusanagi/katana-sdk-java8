@@ -168,15 +168,15 @@ public class Service extends Component<Action, TransportReplyPayload, Service> {
         Transport transport = (Transport) getReply(componentType, action);
 
         TransportEntity transportEntity = new TransportEntity();
-        transportEntity.setMeta(transport.getMeta());
-        transportEntity.setBody(transport.getBody());
-        transportEntity.setFiles(transport.getFilesEntity());
-        transportEntity.setData(transport.getData());
-        transportEntity.setRelations(transport.getRelations());
-        transportEntity.setLinks(transport.getLinks());
-        transportEntity.setCalls(transport.getCalls());
-        transportEntity.setTransactions(transport.getTransactions());
-        transportEntity.setErrors(transport.getErrors());
+        transportEntity.setMeta(transport.getTransportEntity().getMeta());
+        transportEntity.setBody(transport.getTransportEntity().getBody());
+        transportEntity.setFiles(transport.getTransportEntity().getFiles());
+        transportEntity.setData(transport.getTransportEntity().getData());
+        transportEntity.setRelations(transport.getTransportEntity().getRelations());
+        transportEntity.setLinks(transport.getTransportEntity().getLinks());
+        transportEntity.setCalls(transport.getTransportEntity().getCalls());
+        transportEntity.setTransactions(transport.getTransportEntity().getTransactions());
+        transportEntity.setErrors(transport.getTransportEntity().getErrors());
 
         transportResult.setTransport(transportEntity);
 

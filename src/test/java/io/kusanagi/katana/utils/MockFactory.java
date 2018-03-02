@@ -23,7 +23,8 @@ import io.kusanagi.katana.api.commands.common.CommandMeta;
 import io.kusanagi.katana.api.component.Serializer;
 import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.api.component.utils.MessagePackSerializer;
-import io.kusanagi.katana.api.serializers.*;
+import io.kusanagi.katana.api.serializers.CallEntity;
+import io.kusanagi.katana.api.serializers.TransactionEntity;
 import io.kusanagi.katana.sdk.*;
 
 import java.io.IOException;
@@ -156,8 +157,8 @@ public class MockFactory {
         return new Action.Builder().setActionEntity(getActionCommand().getArgument()).build();
     }
 
-    public Call getCall() {
-        return getAction().getTransport().getCalls().get("users").get("1.0.0").get(0);
+    public CallEntity getCall() {
+        return getAction().getTransport().getTransportEntity().getCalls().get("users").get("1.0.0").get(0);
     }
 
     public File getFile() {
@@ -189,11 +190,11 @@ public class MockFactory {
     }
 
     public TransportMeta getTransportMeta() {
-        return getTransport().getMeta();
+        return getTransport().getTransportEntity().getMeta();
     }
 
-    public Transaction getTransaction() {
-        return getTransport().getTransactions();
+    public TransactionEntity getTransaction() {
+        return getTransport().getTransportEntity().getTransactions();
     }
 
     public ServiceTransaction getServiceTransaction() {

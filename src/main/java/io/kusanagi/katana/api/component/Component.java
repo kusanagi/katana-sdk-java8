@@ -26,7 +26,7 @@ import io.kusanagi.katana.api.replies.ErrorPayload;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
 import io.kusanagi.katana.sdk.ActionSchema;
 import io.kusanagi.katana.sdk.Callable;
-import io.kusanagi.katana.sdk.Error;
+import io.kusanagi.katana.api.serializers.ErrorEntity;
 import io.kusanagi.katana.sdk.ServiceSchema;
 import org.zeromq.ZMQ;
 
@@ -56,7 +56,7 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
             new Option(new String[]{Arg.SHORT_DISABLE_COMPACT_NAMES_ARG, Arg.DISABLE_COMPACT_NAMES_ARG}, true, false, false),
             new Option(new String[]{Arg.SHORT_DEBUG_ARG, Arg.DEBUG_ARG}, true, false, false),
             new Option(new String[]{Arg.SHORT_ACTION_ARG, Arg.ACTION_ARG}, true, false, true),
-            new Option(new String[]{Arg.SHORT_QUIET_ARG, Arg.QUIET_ARG}, true, false, false),
+            new Option(new String[]{Arg.SHORT_LOG_ARG, Arg.LOG_ARG}, true, false, true),
     };
 
     private final String workerEndpoint;
@@ -81,7 +81,7 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
 
     private String action;
 
-    private boolean quiet;
+    private int logLevel;
 
     private Map<String, Callable<T>> resources;
 
@@ -128,7 +128,11 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
             generateDefaultSocket();
         }
 
-        if (isDebug() && !this.quiet) {
+        Logger.setComponent(this.getComponent());
+        Logger.setComponentName(this.getName());
+        Logger.setVersion(this.getVersion());
+        Logger.setFrameworkVersion(this.getFrameworkVersion());
+        if (isDebug()) {
             Logger.activate();
         } else {
             Logger.deactivate();
@@ -181,8 +185,8 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
         return action;
     }
 
-    public boolean isQuiet() {
-        return quiet;
+    public int getLogLevel() {
+        return logLevel;
     }
 
     // SDK METHODS
@@ -313,16 +317,23 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
     }
 
     /**
-     * send a string representation of the value argument to stdout as a "DEBUG" log, with a length limit on the value
-     * of 100,000 characters (not including the other elements of the log message, such as the timestamp), and return
-     * true. If the component is not running in debug mode this function MUST NOT send a log, and SHOULD return false.
+     * send a [string representation](#34-string-representation) of the `value` argument to `stdout` as a log, with a
+     * length limit on the value of **100,000** characters (not including the other elements of the log message, such
+     * as the timestamp).
+     *
+     * The `level` argument is the OPTIONAL value to use as the numeric Syslog severity level for the log message, as
+     * defined in RFC5424, which by default is **6**, representing the "Informational" level.
      *
      * @param value String to log
      * @return true if the value gets logged
      */
-    public boolean log(String value) {
-        Logger.log(Logger.DEBUG, value);
+    public boolean log(String value, int level) {
+        Logger.log(level < 0 ? 0 : level > 7 ? 7 : level, value);
         return this.debug;
+    }
+
+    public boolean log(String value) {
+         return log(value, 6);
     }
 
     protected abstract void runShutdown();
@@ -406,7 +417,7 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
     protected abstract void runErrorCallback();
 
     private static ErrorPayload getErrorPayload(Exception e) {
-        Error error = new Error();
+        ErrorEntity error = new ErrorEntity();
         error.setMessage(e.getMessage());
         error.setCode(1);
         error.setStatus(Constants.INTERNAL_SERVER_ERROR_STATUS);
@@ -527,8 +538,8 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
                 case Arg.SHORT_ACTION_ARG:
                     this.action = option.getValue();
                     break;
-                case Arg.SHORT_QUIET_ARG:
-                    this.quiet = true;
+                case Arg.SHORT_LOG_ARG:
+                    this.logLevel = Integer.valueOf(option.getValue());
                     break;
                 default:
                     Logger.log(Logger.ERROR, String.format(ExceptionMessage.UNSUPPORTED_PARAMETER, option.getNames()[0]));
@@ -550,7 +561,7 @@ public abstract class Component<T extends Api, S extends CommandReplyResult, R e
                 ", debug=" + debug +
                 ", var=" + var +
                 ", action=" + action +
-                ", quiet=" + quiet +
+                ", logLevel=" + logLevel +
                 '}';
     }
 }

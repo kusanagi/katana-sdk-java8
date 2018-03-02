@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Key;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
 import io.kusanagi.katana.sdk.*;
-import io.kusanagi.katana.sdk.Error;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +50,7 @@ public class TransportEntity implements CommandReplyResult {
      * this property SHOULD NOT be defined
      */
     @JsonProperty(Key.TRANSPORT_FILES)
-    private Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> files;
+    private Map<String, Map<String, Map<String, Map<String, List<File>>>>> files;
 
     /**
      * The data stored by each Service for the response, if no data exists this property SHOULD NOT be defined
@@ -76,19 +75,19 @@ public class TransportEntity implements CommandReplyResult {
      * The calls to other Services within this request, if no calls exist this property SHOULD NOT be defined
      */
     @JsonProperty(Key.TRANSPORT_CALLS)
-    private Map<String, Map<String, List<Call>>> calls;
+    private Map<String, Map<String, List<CallEntity>>> calls;
 
     /**
      * The transactions registered by each Service, if no transactions exist this property SHOULD NOT be defined
      */
     @JsonProperty(Key.TRANSPORT_TRANSACTIONS)
-    private Transaction transactions;
+    private TransactionEntity transactions;
 
     /**
      * The errors returned by each Service, if no errors exist this property SHOULD NOT be defined
      */
     @JsonProperty(Key.TRANSPORT_ERRORS)
-    private Map<String, Map<String, Map<String, List<io.kusanagi.katana.sdk.Error>>>> errors;
+    private Map<String, Map<String, Map<String, List<ErrorEntity>>>> errors;
 
     /**
      *
@@ -113,11 +112,11 @@ public class TransportEntity implements CommandReplyResult {
         this.body = body;
     }
 
-    public Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> getFiles() {
+    public Map<String, Map<String, Map<String, Map<String, List<File>>>>> getFiles() {
         return files;
     }
 
-    public void setFiles(Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> files) {
+    public void setFiles(Map<String, Map<String, Map<String, Map<String, List<File>>>>> files) {
         this.files = files;
     }
 
@@ -145,27 +144,27 @@ public class TransportEntity implements CommandReplyResult {
         this.links = links;
     }
 
-    public Map<String, Map<String, List<Call>>> getCalls() {
+    public Map<String, Map<String, List<CallEntity>>> getCalls() {
         return calls;
     }
 
-    public void setCalls(Map<String, Map<String, List<Call>>> calls) {
+    public void setCalls(Map<String, Map<String, List<CallEntity>>> calls) {
         this.calls = calls;
     }
 
-    public Transaction getTransactions() {
+    public TransactionEntity getTransactions() {
         return transactions;
     }
 
-    public void setTransactions(Transaction transactions) {
+    public void setTransactions(TransactionEntity transactions) {
         this.transactions = transactions;
     }
 
-    public Map<String, Map<String, Map<String, List<Error>>>> getErrors() {
+    public Map<String, Map<String, Map<String, List<ErrorEntity>>>> getErrors() {
         return errors;
     }
 
-    public void setErrors(Map<String, Map<String, Map<String, List<Error>>>> errors) {
+    public void setErrors(Map<String, Map<String, Map<String, List<ErrorEntity>>>> errors) {
         this.errors = errors;
     }
 

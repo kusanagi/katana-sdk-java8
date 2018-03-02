@@ -15,6 +15,7 @@
 
 package io.kusanagi.katana.sdk;
 
+import io.kusanagi.katana.api.serializers.CallEntity;
 import io.kusanagi.katana.utils.MockFactory;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,11 +28,11 @@ public class CallTest {
     @Test
     public void equalsAndHashcode() {
         MockFactory mockFactory = new MockFactory();
-        Call object = mockFactory.getCall();
-        Assert.assertEquals(object, new Call(object));
+        CallEntity object = mockFactory.getCall();
+        Assert.assertEquals(object, new CallEntity(object));
         Assert.assertEquals(1937583924, object.hashCode());
         Assert.assertEquals(
-                "Call{duration=0, name='posts', version='1.2.0', action='list', caller='null', params=[Param{name='X-Request-Token', value=ac3bd4b8-7da3-4c40-8661-746adfa55e0d, type='string', exists=false}, Param{name='user_id', value=123, type='integer', exists=false}], gateway='null', timeout=0}",
+                "CallEntity{duration=0, name='posts', version='1.2.0', action='list', caller='null', params=[Param{name='X-Request-Token', value=ac3bd4b8-7da3-4c40-8661-746adfa55e0d, type='string', exists=false}, Param{name='user_id', value=123, type='integer', exists=false}], gateway='null', timeout=0}",
                 object.toString());
     }
 

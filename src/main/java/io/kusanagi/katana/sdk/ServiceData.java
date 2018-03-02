@@ -15,45 +15,38 @@
 
 package io.kusanagi.katana.sdk;
 
-public class Error {
+import java.util.List;
+
+/**
+ * Created by jega on 1/03/18.
+ */
+public class ServiceData {
 
     private String address;
     private String name;
     private String version;
-    private String message;
-    private int code;
-    private String status;
+    private List<ActionData> actions;
 
-    public Error(String address, String name, String version, String message, int code, String status) {
+    public ServiceData(String address, String name, String version, List<ActionData> actions) {
         this.address = address;
         this.name = name;
         this.version = version;
-        this.message = message;
-        this.code = code;
-        this.status = status;
+        this.actions = actions;
     }
 
-    public String getAddress() {
-        return address;
+    public String getAddress(){
+        return this.address;
     }
 
-    public String getName() {
-        return name;
+    public String getName(){
+        return this.name;
     }
 
-    public String getVersion() {
-        return version;
+    public String getVersion(){
+        return this.version;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getStatus() {
-        return status;
+    public List<ActionData> getActions(){
+        return this.actions;
     }
 }

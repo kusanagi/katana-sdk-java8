@@ -15,22 +15,23 @@
 
 package io.kusanagi.katana.sdk;
 
-public class Error {
+import java.util.List;
+
+/**
+ * Created by jega on 1/03/18.
+ */
+public class Relation {
 
     private String address;
     private String name;
-    private String version;
-    private String message;
-    private int code;
-    private String status;
+    private String primaryKey;
+    private List<ForeignRelation> foreignRelations;
 
-    public Error(String address, String name, String version, String message, int code, String status) {
+    public Relation(String address, String name, String primaryKey, List<ForeignRelation> foreignRelations) {
         this.address = address;
         this.name = name;
-        this.version = version;
-        this.message = message;
-        this.code = code;
-        this.status = status;
+        this.primaryKey = primaryKey;
+        this.foreignRelations = foreignRelations;
     }
 
     public String getAddress() {
@@ -41,19 +42,11 @@ public class Error {
         return name;
     }
 
-    public String getVersion() {
-        return version;
+    public String getPrimaryKey() {
+        return primaryKey;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getStatus() {
-        return status;
+    public List<ForeignRelation> getForeignRelations() {
+        return foreignRelations;
     }
 }

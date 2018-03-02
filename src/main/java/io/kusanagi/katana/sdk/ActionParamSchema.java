@@ -73,7 +73,7 @@ public class ActionParamSchema {
      * applicable for parameters which are required or if not defined
      */
     @JsonProperty(Key.ACTION_PARAM_SCHEMA_DEFAULT_VALUE)
-    private String defaultValue;
+    private Object defaultValue;
 
     /**
      * Defines whether the parameter is required or not, defaults to false if not defined
@@ -174,7 +174,7 @@ public class ActionParamSchema {
         this.type = Constants.TYPE_STRING;
         this.format = "";
         this.pattern = "";
-        this.defaultValue = "";
+        this.defaultValue = null;
         this.arrayFormat = "";
         this.items = "";
         this.allowEmpty = false;
@@ -371,13 +371,13 @@ public class ActionParamSchema {
      * @return true if the parameter has a default value defined
      */
     public boolean hasDefaultValue() {
-        return defaultValue != null && !defaultValue.isEmpty();
+        return defaultValue != null && (defaultValue instanceof String && !((String)defaultValue).isEmpty());
     }
 
     /**
      * @return the default value defined for the parameter, or an empty string if not defined.
      */
-    public String getDefaultValue() {
+    public Object getDefaultValue() {
         return defaultValue;
     }
 

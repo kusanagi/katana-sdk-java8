@@ -229,25 +229,32 @@ public abstract class Api {
     }
 
     /**
-     * send a string representation of the value argument to stdout as a "DEBUG" log, with a length limit on the value
-     * of 100,000 characters (not including the other elements of the log message, such as the timestamp), and return
-     * true. If the component is not running in debug mode this function MUST NOT send a log, and SHOULD return false.
+     * send a [string representation](#34-string-representation) of the `value` argument to `stdout` as a log, with a
+     * length limit on the value of **100,000** characters (not including the other elements of the log message, such
+     * as the timestamp).
+     *
+     * The `level` argument is the OPTIONAL value to use as the numeric Syslog severity level for the log message, as
+     * defined in RFC5424, which by default is **6**, representing the "Informational" level.
      *
      * @param value String to log
      * @return true if the value gets logged
      */
-    public boolean log(String value) {
-        Logger.log(Logger.DEBUG, value);
+    public boolean log(String value, int level) {
+        Logger.log(level < 0 ? 0 : level > 7 ? 7 : level, value);
         return true;
+    }
+
+    public boolean log(String value) {
+        return log(value, 6);
     }
 
     /**
      *
      * @return This function is only for use in an asynchronous implementation of the SDK, for any other implementation
-     * it MUST return false.
+     * it MUST throw an exception.
      */
     public boolean done(){
-        return false;
+        throw new RuntimeException("SDK does not support async call to end action: Api.done()");
     }
 
     @Override

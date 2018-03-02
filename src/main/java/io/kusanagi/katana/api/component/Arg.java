@@ -129,14 +129,16 @@ public class Arg {
     public static final String ACTION_ARG = "--action";
 
     /**
-     * short argument key for the switch, which if defined MUST disable all logs, even if -D or --debug is present.
+     * short argument key for An OPTIONAL switch, which if defined MUST enable logging support, where the value of the
+     * option specifies the numeric Syslog severity level
      */
-    public static final String SHORT_QUIET_ARG = "-q";
+    public static final String SHORT_LOG_ARG = "-L";
 
     /**
-     * argument key for the switch, which if defined MUST disable all logs, even if -D or --debug is present.
+     * An OPTIONAL switch, which if defined MUST enable logging support, where the value of the option specifies the
+     * numeric Syslog severity level
      */
-    public static final String QUIET_ARG = "--quiet";
+    public static final String LOG_ARG = "--log-level";
 
     private Arg() {
 

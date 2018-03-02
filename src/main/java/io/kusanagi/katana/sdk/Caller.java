@@ -15,26 +15,18 @@
 
 package io.kusanagi.katana.sdk;
 
-public class Error {
+public class Caller {
 
-    private String address;
     private String name;
     private String version;
-    private String message;
-    private int code;
-    private String status;
+    private String action;
+    private Callee callee;
 
-    public Error(String address, String name, String version, String message, int code, String status) {
-        this.address = address;
+    public Caller(String name, String version, String action, Callee callee) {
         this.name = name;
         this.version = version;
-        this.message = message;
-        this.code = code;
-        this.status = status;
-    }
-
-    public String getAddress() {
-        return address;
+        this.action = action;
+        this.callee = callee;
     }
 
     public String getName() {
@@ -45,15 +37,11 @@ public class Error {
         return version;
     }
 
-    public String getMessage() {
-        return message;
+    public String getAction() {
+        return action;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getStatus() {
-        return status;
+    public Callee getCallee() {
+        return callee;
     }
 }

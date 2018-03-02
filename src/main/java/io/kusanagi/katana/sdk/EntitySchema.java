@@ -40,21 +40,38 @@ public class EntitySchema {
     private List<ObjectFieldSchema> fields;
 
     /**
+     * OPTIONAL Defines the entity name, defaults to an empty string
+     */
+    @JsonProperty(Key.ENTITY_SCHEMA_NAME)
+    private String name;
+
+    /**
      * OPTIONAL property that determines if an entity returned by the action MUST be validated, defaults to false
      */
     @JsonProperty(Key.ENTITY_SCHEMA_VALIDATE)
     private boolean validate;
 
+    /**
+     * Defines the name of the property in the entity object which defines the primary key for the entity, defaults to
+     * "id" if not defined
+     */
+    @JsonProperty(Key.ENTITY_SCHEMA_PRIMARY)
+    private String primaryKey;
+
     public EntitySchema() {
         field = new ArrayList<>();
         fields = new ArrayList<>();
+        name = "";
         validate = false;
+        primaryKey = "id";
     }
 
     public EntitySchema(EntitySchema other) {
         this.field = other.field;
         this.fields = other.fields;
+        this.name = other.name;
         this.validate = other.validate;
+        this.primaryKey = other.primaryKey;
     }
 
     public List<FieldSchema> getField() {
@@ -73,6 +90,14 @@ public class EntitySchema {
         this.fields = fields;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public boolean isValidate() {
         return validate;
     }
@@ -81,32 +106,47 @@ public class EntitySchema {
         this.validate = validate;
     }
 
+    public String getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(String primaryKey) {
+        this.primaryKey = primaryKey;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof EntitySchema)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
         EntitySchema that = (EntitySchema) o;
 
-        if (isValidate() != that.isValidate()) {
+        if (validate != that.validate) {
             return false;
         }
-        if (getField() != null ? !getField().equals(that.getField()) : that.getField() != null) {
+        if (field != null ? !field.equals(that.field) : that.field != null) {
             return false;
         }
-        return getFields() != null ? getFields().equals(that.getFields()) : that.getFields() == null;
-
+        if (fields != null ? !fields.equals(that.fields) : that.fields != null) {
+            return false;
+        }
+        if (name != null ? !name.equals(that.name) : that.name != null) {
+            return false;
+        }
+        return primaryKey != null ? primaryKey.equals(that.primaryKey) : that.primaryKey == null;
     }
 
     @Override
     public int hashCode() {
-        int result = getField() != null ? getField().hashCode() : 0;
-        result = 31 * result + (getFields() != null ? getFields().hashCode() : 0);
-        result = 31 * result + (isValidate() ? 1 : 0);
+        int result = field != null ? field.hashCode() : 0;
+        result = 31 * result + (fields != null ? fields.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (validate ? 1 : 0);
+        result = 31 * result + (primaryKey != null ? primaryKey.hashCode() : 0);
         return result;
     }
 
@@ -115,7 +155,9 @@ public class EntitySchema {
         return "EntitySchema{" +
                 "field=" + field +
                 ", fields=" + fields +
+                ", name='" + name + '\'' +
                 ", validate=" + validate +
+                ", primaryKey='" + primaryKey + '\'' +
                 '}';
     }
 }

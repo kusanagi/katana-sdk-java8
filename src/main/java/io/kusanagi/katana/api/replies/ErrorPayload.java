@@ -17,7 +17,7 @@ package io.kusanagi.katana.api.replies;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kusanagi.katana.api.component.Key;
-import io.kusanagi.katana.sdk.Error;
+import io.kusanagi.katana.api.serializers.ErrorEntity;
 
 /**
  * Created by juan on 26/09/16.
@@ -28,17 +28,17 @@ public class ErrorPayload {
      * The internal error while processing the payload, which MUST NOT contain an error from the userland code
      */
     @JsonProperty(Key.ERROR)
-    private Error error;
+    private ErrorEntity error;
 
     public ErrorPayload() {
         //Empty constructor for serialization
     }
 
-    public Error getError() {
+    public ErrorEntity getError() {
         return error;
     }
 
-    public void setError(Error error) {
+    public void setError(ErrorEntity error) {
         this.error = error;
     }
 

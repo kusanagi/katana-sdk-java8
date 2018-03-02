@@ -28,8 +28,7 @@ import io.kusanagi.katana.api.component.utils.Logger;
 import io.kusanagi.katana.api.component.utils.MessagePackSerializer;
 import io.kusanagi.katana.api.replies.ErrorPayload;
 import io.kusanagi.katana.api.replies.ReturnReplyPayload;
-import io.kusanagi.katana.api.serializers.ActionEntity;
-import io.kusanagi.katana.api.serializers.TransportEntity;
+import io.kusanagi.katana.api.serializers.*;
 import org.zeromq.ZMQ;
 
 import java.io.IOException;
@@ -186,17 +185,19 @@ public class Action extends Api {
      * @return Return true if the action has the file
      */
     public boolean hasFile(String name) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = actionEntity.getTransport().getFiles();
+        Map<String, Map<String, Map<String, Map<String, List<File>>>>> pathFiles = actionEntity.getTransport().getFiles();
         for (Map.Entry path : pathFiles.entrySet()) {
-            Map<String, Map<String, Map<String, Map<String, File>>>> serviceFiles = pathFiles.get((String) path.getKey());
+            Map<String, Map<String, Map<String, List<File>>>> serviceFiles = pathFiles.get((String) path.getKey());
             for (Map.Entry service : serviceFiles.entrySet()) {
-                Map<String, Map<String, Map<String, File>>> versionFiles = serviceFiles.get((String) service.getKey());
+                Map<String, Map<String, List<File>>> versionFiles = serviceFiles.get((String) service.getKey());
                 for (Map.Entry version : versionFiles.entrySet()) {
-                    Map<String, Map<String, File>> actionFiles = versionFiles.get((String) version.getKey());
+                    Map<String, List<File>> actionFiles = versionFiles.get((String) version.getKey());
                     for (Map.Entry action : actionFiles.entrySet()) {
-                        Map<String, File> nameFiles = actionFiles.get((String) action.getKey());
-                        if (nameFiles.containsKey(name)) {
-                            return true;
+                        List<File> nameFiles = actionFiles.get((String) action.getKey());
+                        for (File file: nameFiles) {
+                            if(file.getName().equals(name)) {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -214,17 +215,19 @@ public class Action extends Api {
      * @return Return the File
      */
     public File getFile(String name) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = actionEntity.getTransport().getFiles();
+        Map<String, Map<String, Map<String, Map<String, List<File>>>>> pathFiles = actionEntity.getTransport().getFiles();
         for (Map.Entry path : pathFiles.entrySet()) {
-            Map<String, Map<String, Map<String, Map<String, File>>>> serviceFiles = pathFiles.get((String) path.getKey());
+            Map<String, Map<String, Map<String, List<File>>>> serviceFiles = pathFiles.get((String) path.getKey());
             for (Map.Entry service : serviceFiles.entrySet()) {
-                Map<String, Map<String, Map<String, File>>> versionFiles = serviceFiles.get((String) service.getKey());
+                Map<String, Map<String, List<File>>> versionFiles = serviceFiles.get((String) service.getKey());
                 for (Map.Entry version : versionFiles.entrySet()) {
-                    Map<String, Map<String, File>> actionFiles = versionFiles.get((String) version.getKey());
+                    Map<String, List<File>> actionFiles = versionFiles.get((String) version.getKey());
                     for (Map.Entry action : actionFiles.entrySet()) {
-                        Map<String, File> nameFiles = actionFiles.get((String) action.getKey());
-                        if (nameFiles.containsKey(name)) {
-                            return nameFiles.get(name);
+                        List<File> nameFiles = actionFiles.get((String) action.getKey());
+                        for (File file: nameFiles) {
+                            if(file.getName().equals(name)) {
+                                return file;
+                            }
                         }
                     }
                 }
@@ -245,17 +248,17 @@ public class Action extends Api {
      */
     public List<File> getFiles() {
         List<File> files = new ArrayList<>();
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFiles = actionEntity.getTransport().getFiles();
+        Map<String, Map<String, Map<String, Map<String, List<File>>>>> pathFiles = actionEntity.getTransport().getFiles();
         for (Map.Entry path : pathFiles.entrySet()) {
-            Map<String, Map<String, Map<String, Map<String, File>>>> serviceFiles = pathFiles.get((String) path.getKey());
+            Map<String, Map<String, Map<String, List<File>>>> serviceFiles = pathFiles.get((String) path.getKey());
             for (Map.Entry service : serviceFiles.entrySet()) {
-                Map<String, Map<String, Map<String, File>>> versionFiles = serviceFiles.get((String) service.getKey());
+                Map<String, Map<String, List<File>>> versionFiles = serviceFiles.get((String) service.getKey());
                 for (Map.Entry version : versionFiles.entrySet()) {
-                    Map<String, Map<String, File>> actionFiles = versionFiles.get((String) version.getKey());
+                    Map<String, List<File>> actionFiles = versionFiles.get((String) version.getKey());
                     for (Map.Entry action : actionFiles.entrySet()) {
-                        Map<String, File> nameFiles = actionFiles.get((String) action.getKey());
-                        for (Map.Entry name : nameFiles.entrySet()) {
-                            files.add(nameFiles.get((String) name.getKey()));
+                        List<File> nameFiles = actionFiles.get((String) action.getKey());
+                        for (File file: nameFiles) {
+                            files.add(file);
                         }
                     }
                 }
@@ -691,7 +694,7 @@ public class Action extends Api {
         }
 
         // Build the payload
-        Callee callee = new Callee();
+        CalleeEntity callee = new CalleeEntity();
         callee.setAction(getActionName());
         callee.setCalleeInfo(new String[]{service, version, action});
         callee.setTransport(actionEntity.getTransport());
@@ -758,7 +761,7 @@ public class Action extends Api {
                 return returnCommandReply.getCommandReply().getResult().getReturnObject();
             } catch (IOException e) {
                 try {
-                    // Throw Error Payload as exception
+                    // Throw ErrorEntity Payload as exception
                     errorPayload = serializer.deserialize(bytes, ErrorPayload.class);
                     Logger.log(e);
                     throw new IllegalArgumentException(errorPayload.getError().getMessage());
@@ -801,6 +804,10 @@ public class Action extends Api {
         }
     }
 
+    public Object call(String service, String version, String action, List<Param> params, List<File> files) {
+        return call(service, version, action, params, files, 10000);
+    }
+
     /**
      * Register a Service call with the REQUIRED service argument as the name of the Service to call, the REQUIRED
      * version argument as the version of the given Service, and the REQUIRED action argument as the name of the action
@@ -832,23 +839,23 @@ public class Action extends Api {
             }
         }
 
-        Map<String, Map<String, List<Call>>> calls = this.transport.getCalls();
+        Map<String, Map<String, List<CallEntity>>> calls = this.transport.getTransportEntity().getCalls();
 
         if (calls == null) {
             calls = new HashMap<>();
             actionEntity.getTransport().setCalls(calls);
         }
 
-        Call call = new Call();
+        CallEntity call = new CallEntity();
         call.setName(service);
         call.setVersion(version);
         call.setAction(action);
         call.setCaller(actionEntity.getActionName());
         call.setParams(params);
 
-        List<Call> callList = new ArrayList<>();
+        List<CallEntity> callList = new ArrayList<>();
 
-        Map<String, List<Call>> versionCalls = new HashMap<>();
+        Map<String, List<CallEntity>> versionCalls = new HashMap<>();
         versionCalls.put(this.version, callList);
 
         if (calls.containsKey(this.name)) {
@@ -899,10 +906,10 @@ public class Action extends Api {
             }
         }
 
-        Map<String, Map<String, List<Call>>> calls = transport.getCalls();
-        List<Call> callList = new ArrayList<>();
+        Map<String, Map<String, List<CallEntity>>> calls = transport.getTransportEntity().getCalls();
+        List<CallEntity> callList = new ArrayList<>();
 
-        Map<String, List<Call>> versionCalls = new HashMap<>();
+        Map<String, List<CallEntity>> versionCalls = new HashMap<>();
         versionCalls.put(this.version, callList);
 
         if (calls.containsKey(this.name)) {
@@ -915,7 +922,7 @@ public class Action extends Api {
             calls.put(this.name, versionCalls);
         }
 
-        Call call = new Call();
+        CallEntity call = new CallEntity();
         call.setGateway(address);
         call.setName(service);
         call.setVersion(version);
@@ -925,6 +932,10 @@ public class Action extends Api {
         call.setParams(params);
         callList.add(call);
         return this;
+    }
+
+    public Action remoteCall(String address, String service, String version, String action, List<Param> params, List<File> files) {
+        return remoteCall(address, service, version, action, params, files, 10000);
     }
 
     /**
@@ -938,21 +949,21 @@ public class Action extends Api {
      * If an error has already been registered for the given action it MUST be aggregated to the array of errors for
      * that action. The order of this registry is relevant.
      *
-     * @param message Error message
-     * @param code    Error code
-     * @param status  Error status
+     * @param message ErrorEntity message
+     * @param code    ErrorEntity code
+     * @param status  ErrorEntity status
      * @return Return the instance of the action
      */
     public Action error(String message, int code, String status) {
-        Error error = new Error();
+        ErrorEntity error = new ErrorEntity();
         error.setMessage(message);
         error.setCode(code);
         error.setStatus(status);
 
-        Map<String, Map<String, Map<String, List<Error>>>> pathError = actionEntity.getTransport().getErrors();
-        Map<String, Map<String, List<Error>>> serviceError = new HashMap<>();
-        Map<String, List<Error>> versionError = new HashMap<>();
-        List<Error> errors = new ArrayList<>();
+        Map<String, Map<String, Map<String, List<ErrorEntity>>>> pathError = actionEntity.getTransport().getErrors();
+        Map<String, Map<String, List<ErrorEntity>>> serviceError = new HashMap<>();
+        Map<String, List<ErrorEntity>> versionError = new HashMap<>();
+        List<ErrorEntity> errors = new ArrayList<>();
 
         if (pathError.containsKey(getPath())) {
             serviceError = pathError.get(getPath());

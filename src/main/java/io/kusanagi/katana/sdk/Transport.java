@@ -17,8 +17,11 @@ package io.kusanagi.katana.sdk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.kusanagi.katana.api.replies.common.CommandReplyResult;
+import io.kusanagi.katana.api.serializers.CallEntity;
+import io.kusanagi.katana.api.serializers.ErrorEntity;
 import io.kusanagi.katana.api.serializers.TransportEntity;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,44 +46,11 @@ public class Transport implements CommandReplyResult {
         this.transportEntity = other.transportEntity;
     }
 
-    public TransportMeta getMeta() {
-        return transportEntity.getMeta();
+    public TransportEntity getTransportEntity() {
+        return transportEntity;
     }
 
-    public File getBody() {
-        return transportEntity.getBody();
-    }
-
-    public Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> getFilesEntity() {
-        return transportEntity.getFiles();
-    }
-
-    public Map<String, Map<String, Map<String, Map<String, Object>>>> getData() {
-        return transportEntity.getData();
-    }
-
-    public Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> getRelations() {
-        return transportEntity.getRelations();
-    }
-
-    public Map<String, Map<String, Map<String, String>>> getLinks() {
-        return transportEntity.getLinks();
-    }
-
-    public Map<String, Map<String, List<Call>>> getCalls() {
-        return transportEntity.getCalls();
-    }
-
-    public Transaction getTransactions() {
-        return transportEntity.getTransactions();
-    }
-
-    public Map<String, Map<String, Map<String, List<Error>>>> getErrors() {
-        return transportEntity.getErrors();
-    }
-
-
-    // SDK Methods
+// SDK Methods
 
     /**
      * @return Return the UUID of the request.
@@ -163,157 +133,236 @@ public class Transport implements CommandReplyResult {
     }
 
     /**
-     * Return all of the data as an object, as it is stored in the Transport. If the OPTIONAL case sensitive service
-     * argument is specified, it MUST only return the data stored under that Service namespace. If the OPTIONAL case
-     * sensitive version argument is specified, it MUST only return the data stored under the specified Service
-     * namespace and version. If the OPTIONAL case sensitive action argument is specified, it MUST only return the
-     * data stored under the specified Service namespace, version and action name.
      *
-     * @param service Service name
-     * @param version Version of the service
-     * @param action  Name of the action
-     * @return Return all the data as an object, as it is stored in the transport
+     * @return
      */
-    public Object getData(String address, String service, String version, String action) {
-        if (address != null) {
-            if (service != null) {
-                if (version != null) {
-                    if (action != null) {
-                        return transportEntity.getData().get(address).get(service).get(version).get(action);
+    public List<ServiceData> getData() {
+        List<ServiceData> dataList = new ArrayList<>();
+        Map<String, Map<String, Map<String, Map<String, Object>>>> pathData = transportEntity.getData();
+        for (Map.Entry path : pathData.entrySet()) {
+            Map<String, Map<String, Map<String, Object>>> serviceData = pathData.get((String) path.getKey());
+            for (Map.Entry service : serviceData.entrySet()) {
+                Map<String, Map<String, Object>> versionData = serviceData.get((String) service.getKey());
+                for (Map.Entry version : versionData.entrySet()) {
+                    Map<String, Object> actionData = versionData.get((String) version.getKey());
+
+                    List<ActionData> actionDataList = new ArrayList<>();
+
+                    for (Map.Entry action : actionData.entrySet()) {
+                        Object dataObject = actionData.get((String) action.getKey());
+                        ActionData actionDataEntity = new ActionData(
+                            (String) action.getKey(),
+                            dataObject instanceof List || dataObject instanceof Array,
+                            dataObject
+                        );
+                        actionDataList.add(actionDataEntity);
                     }
-                    return transportEntity.getData().get(address).get(service).get(version);
+
+                    ServiceData data = new ServiceData(
+                            (String) path.getKey(),
+                            (String) service.getKey(),
+                            (String) version.getKey(),
+                            actionDataList
+                    );
+
+                    dataList.add(data);
                 }
-                return transportEntity.getData().get(address).get(service);
             }
-            return transportEntity.getData().get(address);
         }
-        return transportEntity.getData();
-    }
-    public Object getData(String address, String service, String version) {
-        return getData(address, service, version, null);
-    }
-    public Object getData(String address, String service) {
-        return getData(address, service, null, null);
-    }
-    public Object getData(String address) {
-        return getData(address, null, null, null);
+        return dataList;
     }
 
     /**
-     * Return all of the relations as an object, as they are stored in the Transport. If the OPTIONAL case sensitive
-     * service argument is specified, it MUST only return the relations stored under that Service namespace.
      *
-     * @param service Service name
-     * @return Return the relations
+     * @return
      */
-    public Object getRelations(String address, String service) {
-        if (address != null) {
-            if (service != null) {
-                return transportEntity.getRelations().get(address).get(service);
+    public List<Relation> getRelations() {
+        List<Relation> relationList = new ArrayList<>();
+        Map<String, Map<String, Map<String, Map<String, Map<String, Object>>>>> pathData = transportEntity.getRelations();
+        for (Map.Entry path : pathData.entrySet()) {
+            Map<String, Map<String, Map<String, Map<String, Object>>>> serviceData = pathData.get((String) path.getKey());
+            for (Map.Entry service : serviceData.entrySet()) {
+                Map<String, Map<String, Map<String, Object>>> idData = serviceData.get((String) service.getKey());
+                for (Map.Entry id : idData.entrySet()) {
+                    Map<String, Map<String, Object>> relPathData = idData.get((String) id.getKey());
+
+                    List<ForeignRelation> foreignRelations = new ArrayList<>();
+                    for (Map.Entry relPath : relPathData.entrySet()) {
+                        Map<String, Object> relationData = relPathData.get((String) relPath.getKey());
+                        for (Map.Entry foreignRelName : relationData.entrySet()) {
+                            Object foreignRel = relationData.get((String) foreignRelName.getKey());
+
+                            List<String> relationIds = new ArrayList<>();
+                            if(foreignRel instanceof String){
+                                relationIds.add((String)foreignRel);
+                            } else {
+                                relationIds.addAll((List)foreignRel);
+                            }
+
+                            ForeignRelation foreignRelation = new ForeignRelation(
+                                    (String) relPath.getKey(),
+                                    (String) foreignRelName.getKey(),
+                                    relationIds.size() == 1 ? "one" : "many",
+                                    relationIds
+                            );
+                            foreignRelations.add(foreignRelation);
+                        }
+                    }
+
+                    Relation relation = new Relation(
+                            (String) path.getKey(),
+                            (String) service.getKey(),
+                            (String) id.getKey(),
+                            foreignRelations
+                    );
+
+                    relationList.add(relation);
+                }
             }
-            return transportEntity.getRelations().get(address);
         }
-        return transportEntity.getRelations();
-    }
-    public Object getRelations(String address) {
-        return getRelations(address, null);
+        return relationList;
     }
 
     /**
-     * Return all of the links as an object, as they are stored in the Transport. If the OPTIONAL case sensitive
-     * service argument is specified, it MUST only return the links stored under that Service namespace.
      *
-     * @param service Service name
-     * @return Return all the links as an object, as they are stored in the Transport
+     * @return
      */
-    public Object getLinks(String address, String service) {
-        if (address != null) {
-            if (service != null) {
-                return transportEntity.getLinks().get(address).get(service);
+    public List<Link> getLinks() {
+        List<Link> links = new ArrayList<>();
+        Map<String, Map<String, Map<String, String>>> pathData = transportEntity.getLinks();
+        for (Map.Entry path : pathData.entrySet()) {
+            Map<String, Map<String, String>> serviceData = pathData.get((String) path.getKey());
+            for (Map.Entry service : serviceData.entrySet()) {
+                Map<String, String> linkData = serviceData.get((String) service.getKey());
+                for (Map.Entry link : linkData.entrySet()) {
+                    Link linkEntity = new Link(
+                            (String) path.getKey(),
+                            (String) service.getKey(),
+                            linkData.get((String)link.getKey()),
+                            (String)link.getKey()
+                    );
+
+                    links.add(linkEntity);
+                }
             }
-            return transportEntity.getLinks().get(address);
         }
-        return transportEntity.getLinks();
-    }
-    public Object getLinks(String address) {
-        return getLinks(address, null);
+        return links;
     }
 
     /**
-     * Return all of the calls as an object, as they are stored in the Transport. If the OPTIONAL case sensitive
-     * service argument is specified, it MUST only return the calls stored under that Service namespace.
      *
-     * @param service Service name
-     * @return Return all the calls as an object, as they are stored in the Transport.
+     * @return
      */
-    public Object getCalls(String service) {
-        if (service != null) {
-            return transportEntity.getCalls().get(service);
+    public List<Caller> getCalls() {
+        List<Caller> callers = new ArrayList<>();
+        Map<String, Map<String, List<CallEntity>>> serviceData = transportEntity.getCalls();
+        for (Map.Entry service : serviceData.entrySet()) {
+            Map<String, List<CallEntity>> versionData = serviceData.get((String) service.getKey());
+            for (Map.Entry version : versionData.entrySet()) {
+                List<CallEntity> calls = versionData.get((String) version.getKey());
+                for (CallEntity call : calls) {
+                    Callee callee = new Callee(
+                            call.getDuration(),
+                            call.getGateway() == null || call.getGateway().isEmpty(),
+                            call.getGateway(),
+                            call.getTimeout(),
+                            call.getName(),
+                            call.getVersion(),
+                            call.getAction(),
+                            call.getParams()
+                    );
+
+                    Caller caller = new Caller(
+                            (String) service.getKey(),
+                            (String) version.getKey(),
+                            call.getCaller(),
+                            callee
+                    );
+
+                    callers.add(caller);
+                }
+            }
         }
-        return transportEntity.getCalls();
+        return callers;
+    }
+
+    public List<Transaction> getTransactions(String type) {
+        List<Transaction> transactions = new ArrayList<>();
+
+        if(type.equals("commit")) {
+            for (ServiceTransaction serviceTransaction : transportEntity.getTransactions().getCommit()) {
+                transactions.add(new Transaction(
+                        "commit",
+                        serviceTransaction.getName(),
+                        serviceTransaction.getVersion(),
+                        serviceTransaction.getCaller(),
+                        serviceTransaction.getAction(),
+                        serviceTransaction.getParams()
+                ));
+            }
+        } else if(type.equals("rollback")){
+            for (ServiceTransaction serviceTransaction : transportEntity.getTransactions().getRollback()) {
+                transactions.add(new Transaction(
+                        "rollback",
+                        serviceTransaction.getName(),
+                        serviceTransaction.getVersion(),
+                        serviceTransaction.getCaller(),
+                        serviceTransaction.getAction(),
+                        serviceTransaction.getParams()
+                ));
+            }
+        } else if (type.equals("complete")){
+            for (ServiceTransaction serviceTransaction : transportEntity.getTransactions().getComplete()) {
+                transactions.add(new Transaction(
+                        "complete",
+                        serviceTransaction.getName(),
+                        serviceTransaction.getVersion(),
+                        serviceTransaction.getCaller(),
+                        serviceTransaction.getAction(),
+                        serviceTransaction.getParams()
+                ));
+            }
+
+        }
+
+        return transactions;
     }
 
     /**
-     * Return all of the transactions as an object, as they are stored in the Transport. If the OPTIONAL case
-     * sensitive service argument is specified, it MUST only return the transactions stored under that Service
-     * namespace.
      *
-     * @param service Service name
-     * @return Return all the transactions as an object, as they are stored in the Transport.
+     * @return
      */
-    public Transaction getTransactions(String service) {
-        Transaction transaction = new Transaction();
-        transaction.setCommit(new ArrayList<>());
-        transaction.setRollback(new ArrayList<>());
-        transaction.setComplete(new ArrayList<>());
-
-        for (ServiceTransaction serviceTransaction : transportEntity.getTransactions().getCommit()) {
-            if (serviceTransaction.getName().equals(service)) {
-                transaction.getCommit().add(serviceTransaction);
+    public List<Error> getErrors() {
+        List<Error> errors = new ArrayList<>();
+        Map<String, Map<String, Map<String, List<ErrorEntity>>>> pathData = transportEntity.getErrors();
+        for (Map.Entry path : pathData.entrySet()) {
+            Map<String, Map<String, List<ErrorEntity>>> serviceData = pathData.get((String) path.getKey());
+            for (Map.Entry service : serviceData.entrySet()) {
+                Map<String, List<ErrorEntity>> versionData = serviceData.get((String)service.getKey());
+                for (Map.Entry version : versionData.entrySet()) {
+                    List<ErrorEntity> errorData = versionData.get((String)version.getKey());
+                    for(ErrorEntity errorEntity : errorData) {
+                        errors.add(new Error(
+                                (String) path.getKey(),
+                                (String)service.getKey(),
+                                (String)version.getKey(),
+                                errorEntity.getMessage(),
+                                errorEntity.getCode(),
+                                errorEntity.getStatus()
+                        ));
+                    }
+                }
             }
         }
-
-        for (ServiceTransaction serviceTransaction : transportEntity.getTransactions().getRollback()) {
-            if (serviceTransaction.getName().equals(service)) {
-                transaction.getRollback().add(serviceTransaction);
-            }
-        }
-
-        for (ServiceTransaction serviceTransaction : transportEntity.getTransactions().getComplete()) {
-            if (serviceTransaction.getName().equals(service)) {
-                transaction.getComplete().add(serviceTransaction);
-            }
-        }
-
-        return transaction;
-    }
-
-    /**
-     * Return all of the errors as an object, as they are stored in the Transport. If the OPTIONAL case sensitive
-     * service argument is specified, it MUST only return the links stored under that Service namespace.
-     *
-     * @param service Service name
-     * @return Return all the errors as an object, as they are stored in the Transport.
-     */
-    public Object getErrors(String address, String service) {
-        if (address != null) {
-            if (service != null) {
-                return transportEntity.getErrors().get(address).get(service);
-            }
-            return transportEntity.getErrors().get(address);
-        }
-        return transportEntity.getErrors();
-    }
-    public Object getErrors(String address) {
-        return getErrors(address, null);
+        return errors;
     }
 
     public void addFile(String path, String service, String version, String action, File file) {
-        Map<String, Map<String, Map<String, Map<String, Map<String, File>>>>> pathFile = transportEntity.getFiles();
-        Map<String, Map<String, Map<String, Map<String, File>>>> serviceFile = new HashMap<>();
-        Map<String, Map<String, Map<String, File>>> versionFile = new HashMap<>();
-        Map<String, Map<String, File>> actionFile = new HashMap<>();
-        Map<String, File> nameFile = new HashMap<>();
+        Map<String, Map<String, Map<String, Map<String, List<File>>>>> pathFile = transportEntity.getFiles();
+        Map<String, Map<String, Map<String, List<File>>>> serviceFile = new HashMap<>();
+        Map<String, Map<String, List<File>>> versionFile = new HashMap<>();
+        Map<String, List<File>> actionFile = new HashMap<>();
+        List<File> nameFile = new ArrayList<>();
 
         if (pathFile.containsKey(path)) {
             serviceFile = pathFile.get(path);
@@ -342,7 +391,7 @@ public class Transport implements CommandReplyResult {
             pathFile.put(path, serviceFile);
         }
 
-        nameFile.put(file.getName(), file);
+        nameFile.add(file);
     }
 
     public static class Builder{
